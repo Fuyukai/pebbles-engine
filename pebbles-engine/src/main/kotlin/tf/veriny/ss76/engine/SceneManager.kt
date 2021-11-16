@@ -36,12 +36,6 @@ public class SceneManager(
     public val state: EngineState,
     public val namespace: String
 ) : Saveable {
-    private companion object {
-        val CONTENT_PREFIXES = listOf(
-            "sussex", "su", "norfolk", "no", "kent", "common", "truth", "reality",
-            "side.", "chess-"
-        )
-    }
 
     private val seenScenes /*on the sea shore*/= mutableSetOf<String>()
     public val registeredScenes: MutableMap<String, SceneDefinition> = mutableMapOf()
@@ -250,36 +244,7 @@ public class SceneManager(
     }
 
     // == Debug == //
-    public fun writeAllSceneData() {
-        val file = Path.of("./scenes.txt")
-        Files.newBufferedWriter(
-            file, Charsets.UTF_8,
-            CREATE, WRITE, TRUNCATE_EXISTING
-        ).use {
-            it.write("=== DEBUG SCENE OUTPUT ===\n\n")
-
-            for (entry in registeredScenes) {
-                if (!CONTENT_PREFIXES.any { i -> entry.key.startsWith(i) }) {
-                    continue
-                }
-
-                //it.write("== SCENE ==\n")
-                val name = entry.key
-                val scene = entry.value
-
-                //it.write("ID: ${scene.id}\n")
-                //it.write("Page count: ${scene.pageCount}\n\n")
-                for (page in 0 until scene.pageCount) {
-                    //it.write("= PAGE $page =\n")
-                    val data = scene.originalPages[page]
-                    it.write(data)
-                    //it.write("= END PAGE $page=\n\n")
-                }
-                //it.write("== END SCENE ==\n\n")
-            }
-        }
-
-    }
+    public fun writeAllSceneData() {}
 
     // == Input == //
 }
