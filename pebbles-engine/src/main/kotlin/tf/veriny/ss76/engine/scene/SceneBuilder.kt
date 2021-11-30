@@ -55,6 +55,10 @@ public class PageBuilder(
         if (addNewline) page.append('\n')
     }
 
+    public fun nnline(data: String) {
+        line(data, addNewline = false)
+    }
+
     public fun lline(data: String, addNewline: Boolean = true) {
         page.append(data)
         ensureBlankChar()
