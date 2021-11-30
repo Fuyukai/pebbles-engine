@@ -22,6 +22,9 @@ import tf.veriny.ss76.engine.*
 import tf.veriny.ss76.engine.adv.ADVSubRenderer
 import tf.veriny.ss76.ignore
 
+private val PUSH_REGEX = "^(?:push-scene-|ps-)(.*)".toRegex()
+private val CHANGE_REGEX = "^(?:change-scene-|cs-)(.*)".toRegex()
+
 /**
  * A single builder for a single page.
  */
@@ -189,22 +192,11 @@ public class SceneDefinitionBuilder(
      * Creates a definition from a page.
      */
     private fun createDefinitionFromPage(page: StringBuilder): List<TextualNode> {
-        val printScene = System.getProperty("ss76-print-scene-data")
-
         val pageFullString = page.toString()
         val nodes = try {
-            splitScene(pageFullString, v = sceneId == printScene)
+            splitScene(pageFullString, v = false)
         } catch (e: Exception) {
             throw IllegalStateException("Caught error trying to tokenize:\n$pageFullString", e)
-        }
-
-        if (sceneId == printScene) {
-            println("Round-trip parse:\n")
-            println(nodes.joinToString("") { it.repr() })
-            println()
-
-            println("Scene timings:\n")
-            nodes.debugPrintTimings()
         }
 
         // auto-create missing buttons
@@ -212,31 +204,22 @@ public class SceneDefinitionBuilder(
 
         for (node in missing) {
             val buttonName = node.buttonId!!
-            // todo: less gross
-            when {
-                buttonName.startsWith("push-scene-") -> {
-                    val sceneId = buttonName.removePrefix("push-scene-")
-                    val button = PushSceneButton(buttonName, sceneId)
-                    buttons[buttonName] = button
-                }
-                buttonName.startsWith("ps-") -> {
-                    val sceneId = buttonName.removePrefix("ps-")
-                    val button = PushSceneButton(buttonName, sceneId)
-                    buttons[buttonName] = button
-                }
 
-                buttonName.startsWith("change-scene-") -> {
-                    val sceneId = buttonName.removePrefix("change-scene-")
-                    val button = PushSceneButton(buttonName, sceneId)
-                    buttons[buttonName] = button
-                }
-                buttonName.startsWith("cs-") -> {
-                    val sceneId = buttonName.removePrefix("cs-")
-                    val button = PushSceneButton(buttonName, sceneId)
-                    buttons[buttonName] = button
-                }
-                else -> throw IllegalArgumentException("Missing definition for button $buttonName")
-            }.ignore()
+            val pushMatch = PUSH_REGEX.matchEntire(buttonName)
+            if (pushMatch != null) {
+                val sceneId = pushMatch.groups[0]!!.value
+                val button = PushSceneButton(buttonName, sceneId)
+                buttons[buttonName] = button
+            }
+
+            val csMatch = CHANGE_REGEX.matchEntire(buttonName)
+            if (csMatch != null) {
+                val sceneId = csMatch.groups[0]!!.value
+                val button = ChangeSceneButton(buttonName, sceneId)
+                buttons[buttonName] = button
+            }
+
+            throw IllegalArgumentException("Missing definition for button $buttonName")
         }
 
         return nodes

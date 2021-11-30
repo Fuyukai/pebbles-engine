@@ -1,10 +1,9 @@
 plugins {
     id("org.jetbrains.kotlin.jvm")
-    id("org.beryx.runtime").version("1.12.5")
     id("maven-publish")
 }
 
-version = "0.7.0"
+version = "0.7.1"
 
 dependencies {
     api("com.badlogicgames.gdx:gdx:1.10.0")
@@ -31,7 +30,7 @@ publishing {
 
         pom {
             name.set(project.name)
-            description.set("The SS76 virtual novel engine")
+            description.set("The Pebbles virtual novel engine")
             url.set("https://vnengine.veriny.tf")
 
             licenses {
