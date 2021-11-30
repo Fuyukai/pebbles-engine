@@ -48,9 +48,9 @@ public class CheckpointManager(
             BASE_DIR = if (bb == null) {
                 // windows shit...
                 val dir = Path.of(System.getenv("APPDATA"))
-                dir.resolve("ss76")
+                dir.resolve("pebbles")
             } else {
-                Path.of(bb).resolve("ss76")
+                Path.of(bb).resolve("pebbles")
             }
         }
 
