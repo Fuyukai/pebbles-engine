@@ -29,7 +29,7 @@ import kotlin.time.measureTime
 /**
  * The EngineState object wraps systems required to run the SS76 engine.
  */
-public class EngineState {
+public class EngineState(public val namespace: String) {
     private val demoRenderer = OddCareRenderer()
 
     /** Used to conditionally enable or disable debugging content. */

@@ -443,7 +443,7 @@ public class NVLRendererV3(
             if (!definition.modifiers.textOnlyMode) {
                 drawClickables()
 
-                val topText = /*definition.effects.topText ?:*/ "MAGELLANIC GAP"
+                val topText = definition.modifiers.topText
                 val font = state.engineState.fontManager.topTextFont.default
                 glyphLayout.setText(font, topText)
                 val yOffset = viewport.worldHeight - 10f

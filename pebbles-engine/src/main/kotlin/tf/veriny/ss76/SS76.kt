@@ -15,11 +15,14 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
 /**
- * Main game object.
+ * Main game object. Don't touch this directly.
  */
 @OptIn(ExperimentalTime::class)
 @Suppress("GDXKotlinStaticResource")  // don't care, these will never be disposed
-public class SS76(private val callback: (EngineState) -> Unit) : KtxApplicationAdapter {
+public class SS76(
+    private val namespace: String,
+    private val callback: (EngineState) -> Unit
+) : KtxApplicationAdapter {
     public companion object {
         public val IS_DEMO: Boolean =
             System.getProperty("demo", "false").toBooleanStrict()
@@ -41,7 +44,7 @@ public class SS76(private val callback: (EngineState) -> Unit) : KtxApplicationA
     }
 
     private fun createImpl() {
-        state = EngineState()
+        state = EngineState(namespace)
         state.created(callback)
 
         Gdx.input.inputProcessor = state.input

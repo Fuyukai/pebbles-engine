@@ -61,4 +61,9 @@ public data class SceneModifiers(
      * that regular scenes incur.
      */
     public val nonRenderable: Boolean = false,
+
+    /**
+     * The text at the top of the screen to draw.
+     */
+    public val topText: String = "PEBBLES ENGINE",
 )

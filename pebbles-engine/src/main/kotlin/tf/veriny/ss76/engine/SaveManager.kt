@@ -24,7 +24,9 @@ import kotlin.io.path.getLastModifiedTime
 /**
  * Handles saving persistent state.
  */
-public class SaveManager(private val state: EngineState) {
+public class SaveManager(
+    private val state: EngineState
+) {
     private companion object {
         val BASE_DIR: Path
         val MAGIC = "SS76".toByteArray().toByteString()
@@ -34,16 +36,15 @@ public class SaveManager(private val state: EngineState) {
             val bb = BaseDirectories.get().dataDir
             BASE_DIR = if (bb == null) {
                 // windows shit...
-                val dir = Path.of(System.getenv("APPDATA"))
-                dir.resolve("magellanic-gap")
+                Path.of(System.getenv("APPDATA"))
             } else {
-                Path.of(bb).resolve("magellanic-gap")
+                Path.of(bb)
             }
         }
 
     }
 
-    private val saveDir = BASE_DIR.resolve("magellanic-gap").also { it.createDirectories() }
+    private val saveDir = BASE_DIR.resolve(state.namespace).also { it.createDirectories() }
 
     // extra subsystems that need saving
     private val needsSaving: MutableMap<String, Saveable> = mutableMapOf()
