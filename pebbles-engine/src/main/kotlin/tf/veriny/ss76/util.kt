@@ -1,18 +1,7 @@
 /*
- * This file is part of Pebbles.
- *
- * Pebbles is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Pebbles is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Pebbles.  If not, see <https://www.gnu.org/licenses/>.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
 @file:Suppress("SpellCheckingInspection")
@@ -23,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import java.nio.charset.Charset
 import kotlin.random.Random
+import kotlin.reflect.KClass
 
 
 /**
@@ -51,13 +41,24 @@ public inline fun <R> ShapeRenderer.use(type: ShapeRenderer.ShapeType, fn: Shape
 
 public fun Any?.ignore(): Unit = Unit
 
+public fun Iterable<Boolean>.all(): Boolean {
+    for (i in this) {
+        if (!i) return false
+    }
 
-public fun isInsideJar(): Boolean {
-    val uri = SS76::class.java.getResource("SS76.class")!!.toURI()
+    return true
+}
+
+
+/**
+ * Checks if the specified class
+ */
+public fun isInsideJar(usingKlass: KClass<*> = SS76::class): Boolean {
+    val uri = usingKlass.java.getResource("${usingKlass.simpleName}.class")!!.toURI()
     return uri.scheme == "jar"
 }
 
-private val ALNUM = ('0' .. '9') + ('A' .. 'Z') + ('a' .. 'z')
+private val ALNUM = ('0'..'9') + ('A'..'Z') + ('a'..'z')
 private val ALPHA = ('A'..'Z') + ('a'..'z')
 
 public fun randomChar/*lotte*/(r: Random, numbers: Boolean = false): Char {
@@ -65,7 +66,7 @@ public fun randomChar/*lotte*/(r: Random, numbers: Boolean = false): Char {
     else ALPHA.random(r)
 }
 
-public fun randomString(r: Random, length: Int) : String {
+public fun randomString(r: Random, length: Int): String {
     return (0 until length).joinToString("") { ALPHA.random(r).toString() }
 }
 

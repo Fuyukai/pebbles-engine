@@ -1,6 +1,12 @@
+import com.diffplug.gradle.spotless.SpotlessExtension
+import com.diffplug.gradle.spotless.SpotlessTask
+import org.jetbrains.kotlin.gradle.dsl.ExplicitApiMode
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
-    id("org.jetbrains.kotlin.jvm").version("1.6.0-RC2").apply(false)
-    id("com.diffplug.spotless").version("6.0.0").apply(false)
+    id("org.jetbrains.kotlin.jvm").version("1.8.0").apply(false)
+    id("com.diffplug.spotless").version("6.16.0").apply(false)
 }
 
 allprojects {
@@ -25,21 +31,25 @@ subprojects {
     configure<JavaPluginExtension> {
         withSourcesJar()
         withJavadocJar()
-    }
 
-    configure<com.diffplug.gradle.spotless.SpotlessExtension> {
-        kotlin {
-            targetExclude("build/generated/**")
-            licenseHeaderFile(rootProject.file("gradle/LICENCE-HEADER"))
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(19))
         }
     }
 
-    configure<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension> {
-        explicitApi = org.jetbrains.kotlin.gradle.dsl.ExplicitApiMode.Strict
+    configure<SpotlessExtension> {
+        kotlin {
+            targetExclude("build/generated/**")
+            licenseHeaderFile(project.file("LICENCE-HEADER"))
+        }
+    }
+
+    configure<KotlinJvmProjectExtension> {
+        explicitApi = ExplicitApiMode.Strict
     }
 
     tasks {
-        withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        withType<KotlinCompile> {
             kotlinOptions {
                 freeCompilerArgs = freeCompilerArgs + listOf(
                     "-Xopt-in=kotlin.RequiresOptIn",  // Enable @OptIn
@@ -48,8 +58,15 @@ subprojects {
                     "-Xassertions=always-enable",  // Forcibly enable assertions
                     "-Xlambdas=indy",  // Forcibly use invokedynamic for all lambdas.
                 )
-                jvmTarget = "16"
+                jvmTarget = "19"
             }
+        }
+
+        filter { it.name.startsWith("spotless") }
+            .forEach { it.group = "lint" }
+
+        withType<JavaCompile> {
+            targetCompatibility = "19"
         }
     }
 }

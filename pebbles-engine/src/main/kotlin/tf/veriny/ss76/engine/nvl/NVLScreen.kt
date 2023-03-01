@@ -1,72 +1,95 @@
 /*
- * This file is part of Pebbles.
- *
- * Pebbles is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Pebbles is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Pebbles.  If not, see <https://www.gnu.org/licenses/>.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
 package tf.veriny.ss76.engine.nvl
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
+import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.utils.viewport.StretchViewport
 import tf.veriny.ss76.EngineState
-import tf.veriny.ss76.SS76
 import tf.veriny.ss76.engine.ChangeSceneButton
+import tf.veriny.ss76.engine.VnButtonManager
+import tf.veriny.ss76.engine.scene.SceneState
 import tf.veriny.ss76.engine.screen.Screen
 
 /**
  * The NVL screen is responsible for rendering a scene in NVL mode.
  */
-public class NVLScreen(private val state: EngineState) : Screen {
-    private val currentRenderer = NVLRenderer(state)
+public class NVLScreen(
+    private val state: EngineState,
+    private val scene: SceneState,
+) : Screen {
+
+
+    private val camera = OrthographicCamera()
+    private val viewport = StretchViewport(1280f, 960f, camera)
+    private val buttons = VnButtonManager(state, camera)
+    private val currentRenderer: NVLRendererV3
+
+    init {
+        viewport.update(
+            /* screenWidth = */ Gdx.graphics.width,
+            /* screenHeight = */ Gdx.graphics.height,
+            /* centerCamera = */ true
+        )
+
+        camera.update()
+
+        currentRenderer = NVLRendererV3(scene, viewport, camera, buttons)
+    }
 
     /**
      * Renders the current screen.
      */
     override fun render(delta: Float) {
-        currentRenderer.render(state.sceneManager.currentScene)
+        currentRenderer.render()
+        scene.timer++
+    }
+
+    override fun mouseMoved(screenX: Int, screenY: Int): Boolean {
+        return buttons.mouseMoved(screenX, screenY)
     }
 
     override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
-        val current = state.sceneManager.currentScene
-        if (!current.definition.effects.disableTextSkip) current.timer = 999999
-        return true
+        if (buttons.touchDown(screenX, screenY, pointer, button)) return true
+        if (scene.timer >= 0 && scene.canTextSkip()) {
+            scene.timer = 999999
+            return true
+        }
+
+        return false
     }
 
     override fun keyDown(keycode: Int): Boolean {
         val current = state.sceneManager.currentScene
-        val pagination = current.definition.enablePagination
-        val textskip = !current.definition.effects.disableTextSkip
+        val pagination = current.definition.modifiers.drawPageButtons
 
-        if (pagination && (keycode == Input.Keys.LEFT || keycode == Input.Keys.DPAD_LEFT)) {
+        if (pagination && (keycode == Input.Keys.LEFT)) {
             current.pageBack()
-        } else if (pagination && (keycode == Input.Keys.RIGHT || keycode == Input.Keys.DPAD_RIGHT)) {
+        } else if (pagination && (keycode == Input.Keys.RIGHT)) {
             current.pageNext()
-        } else if (textskip && keycode == Input.Keys.SPACE) {
-            if (!current.definition.effects.disableTextSkip) current.timer = 999999
+        } else if (scene.canTextSkip() && keycode == Input.Keys.SPACE) {
+            current.timer = 999999
             return true
         } else if (keycode == Input.Keys.ENTER) {
-            val buttons = state.buttonManager.buttonRects.keys.filterIsInstance<ChangeSceneButton>()
+            val buttons = buttons.buttonRects.keys.filterIsInstance<ChangeSceneButton>()
 
             if (buttons.isEmpty() || buttons.size > 1) return false
 
             val button = buttons.first()
             button.run(state)
+        } else if (keycode == Input.Keys.BACKSPACE) {
+            if (state.sceneManager.stackSize > 1) state.sceneManager.exitScene()
         }
 
         return false
     }
 
     override fun dispose() {
-
+        currentRenderer.dispose()
     }
 }

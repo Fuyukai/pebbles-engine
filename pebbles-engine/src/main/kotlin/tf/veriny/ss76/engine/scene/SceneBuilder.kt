@@ -1,29 +1,24 @@
 /*
- * This file is part of Pebbles.
- *
- * Pebbles is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Pebbles is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Pebbles.  If not, see <https://www.gnu.org/licenses/>.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
 package tf.veriny.ss76.engine.scene
 
 import com.badlogic.gdx.graphics.Color
+import tf.veriny.ss76.EngineState
 import tf.veriny.ss76.engine.*
 import tf.veriny.ss76.engine.adv.ADVSubRenderer
-import tf.veriny.ss76.ignore
 
 private val PUSH_REGEX = "^(?:push-scene-|ps-)(.*)".toRegex()
 private val CHANGE_REGEX = "^(?:change-scene-|cs-)(.*)".toRegex()
+
+/**
+ * Returned by page builders.
+ */
+@JvmInline
+public value class RegisteredPage(public val idx: Int)
 
 /**
  * A single builder for a single page.
@@ -40,6 +35,13 @@ public class PageBuilder(
     }
 
     /**
+     * Appends raw text to this page.
+     */
+    public fun raw(content: String) {
+        page.append(content)
+    }
+
+    /**
      * Clears the current page.
      */
     public fun clear() {
@@ -47,25 +49,45 @@ public class PageBuilder(
     }
 
     /**
-     * Adds a new line of text to this page. This will be automatically split and
-     * formatted according to the various formatting characters.
+     * Adds a new line of text to this page. This will be automatically split and formatted
+     * according to the various formatting characters.
      */
     public fun line(data: String, addNewline: Boolean = true) {
         page.append(data)
         if (addNewline) page.append('\n')
     }
 
+    /**
+     * Adds a line of text without a trailing newline. This is equiv to
+     * ``line(data, addNewline = false)``.
+     */
     public fun nnline(data: String) {
         line(data, addNewline = false)
     }
 
-    public fun lline(data: String, addNewline: Boolean = true) {
+    /**
+     * Adds a line of text with linger frames.
+     */
+    public fun lline(
+        data: String,
+        lingerFrames: Int = -1,
+        addNewline: Boolean = true
+    ) {
         page.append(data)
         ensureBlankChar()
-        page.append(":linger:")
+
+        if (lingerFrames > 1) {
+            page.append(":linger:$lingerFrames")
+        } else {
+            page.append(":linger:")
+        }
+
         if (addNewline) page.append('\n')
     }
 
+    /**
+     * Adds a line of text that obeys dialogue rules (i.e. is padded by 6 characters).
+     */
     public fun dline(
         data: String, addNewline: Boolean = true, linger: Boolean = true, lingerFrames: Int = 60
     ) {
@@ -91,7 +113,28 @@ public class PageBuilder(
     /**
      * Adds a button that changes the current scene.
      */
-    public fun changeSceneButton(sceneId: String, text: String, eventFlag: String? = null) {
+    public fun changeSceneButton(
+        sceneId: String,
+        text: String,
+        eventFlag: String? = null,
+        eventValue: Int = 1,
+    ) {
+        ensureBlankChar()
+        val buttonName = if (eventFlag != null) {
+            "change-scene-$sceneId-$eventFlag"
+        } else "change-scene-$sceneId"
+        val realText = ":push:@linked@`$buttonName` $text :pop: "
+
+        line(realText, addNewline = false)
+        addButton(ChangeSceneButton(buttonName, sceneId, eventFlag, eventValue))
+    }
+
+    public fun nextSceneButton(
+        sceneId: String,
+        text: String,
+        eventFlag: String? = null,
+        eventValue: Int = 1,
+    ) {
         ensureBlankChar()
         val buttonName = if (eventFlag != null) {
             "change-scene-$sceneId-$eventFlag"
@@ -99,19 +142,24 @@ public class PageBuilder(
         val realText = ":push:@salmon@`$buttonName` $text :pop: "
 
         line(realText, addNewline = false)
-        addButton(ChangeSceneButton(buttonName, sceneId, eventFlag))
+        addButton(ChangeSceneButton(buttonName, sceneId, eventFlag, eventValue))
     }
 
     /**
      * Adds a button that pushes a new scene onto the stack.
      */
-    public fun pushSceneButton(sceneId: String, text: String, eventFlag: String? = null) {
+    public fun pushSceneButton(
+        sceneId: String,
+        text: String,
+        eventFlag: String? = null,
+        eventValue: Int = 1,
+    ) {
         ensureBlankChar()
         val buttonName = "push-scene-$sceneId"
         val realText = ":push:@linked@`push-scene-$sceneId` $text :pop: "
         line(realText, addNewline = false)
 
-        addButton(PushSceneButton(buttonName, sceneId, eventFlag))
+        addButton(PushSceneButton(buttonName, sceneId, eventFlag, eventValue))
     }
 
     /**
@@ -126,44 +174,145 @@ public class PageBuilder(
 
 }
 
+public class PageTemplate(
+    private val builder: SceneDefinitionBuilder,
+    private val previousContent: String
+) {
+    /**
+     * Extends this template into another template.
+     */
+    public fun moreTemplate(block: PageBuilder.() -> Unit): PageTemplate {
+        return builder.template {
+            raw(previousContent)
+            block()
+        }
+    }
+
+    /**
+     * Creates this page, without adding additional content.
+     */
+    public fun create(): RegisteredPage {
+        return builder.page { raw(previousContent) }
+    }
+
+    /**
+     * Extends this template, without marking the previous text as instant.
+     */
+    public fun standalone(block: PageBuilder.() -> Unit): RegisteredPage {
+        return builder.page {
+            raw(previousContent)
+            this.block()
+        }
+    }
+
+    /**
+     * Extends this template, marking the previous text as instant.
+     */
+    public fun extra(chomp: Boolean = true, block: PageBuilder.() -> Unit): RegisteredPage {
+        return builder.page {
+            raw(":newline-linger:false :push:¬instant¬ ")
+            raw(previousContent)
+            raw(" :pop: :newline-linger:true ")
+            if (chomp) raw(":chomp:")
+
+            this.block()
+        }
+    }
+
+}
+
 /**
  * Builder helper for creating new scene definitions.
  */
 public class SceneDefinitionBuilder(
     private val sceneId: String,
-    /**
-     * The scene effects used for this scene.
-     */
-    public val effects: SceneEffects = SceneEffects(),
 ) {
     public val pages: MutableList<StringBuilder> = mutableListOf()
+
     @PublishedApi
     internal val buttons: MutableMap<String, Button> = mutableMapOf()
+
     private val onLoadHandlers: MutableList<(SceneState) -> Unit> = mutableListOf()
 
-    /** If pagination should be enabled. Useful for choiced scenes. */
-    public var enablePagination: Boolean = true
-
-    /** The linked inventory index. */
-    public var linkedInventoryIdx: Int = 0
-
-    /** The colour to clear the screen on loading. */
-    public var clearScreenColour: Color?
-        get() = effects.backgroundColour
-        set(value) { effects.backgroundColour = value }
-
-    /** The top text to change to on loading. */
-    public var topText: String?
-        get() = effects.topText
-        set(value) { effects.topText = value }
-
-    /** If this scene should draw with the colours inverted. */
-    public var invert: Boolean
-        get() = effects.invert
-        set(value) { effects.invert = value }
+    /**
+     * The modifiers for this scene. You should set your options with ``modifiers = modifiers.copy(...)``.
+     */
+    public var modifiers: SceneModifiers = SceneModifiers()
 
     /** The ADV mode sub-renderer for this scene. */
     public var advRenderer: ADVSubRenderer? = null
+
+    /** The default frames per word to use, when not  */
+    public var defaultFramesPerWord: Int = DEFAULT_FRAMES_PER_WORD
+
+    // == modifier functions == //
+    public fun enablePagination(): SceneDefinitionBuilder {
+        modifiers = modifiers.copy(drawPageButtons = true)
+        return this
+    }
+
+    public fun fadeIn(): SceneDefinitionBuilder {
+        modifiers = modifiers.copy(causesFadeIn = true)
+        return this
+    }
+
+    public fun backgroundName(name: String): SceneDefinitionBuilder {
+        modifiers = modifiers.copy(backgroundName = name)
+        return this
+    }
+
+    public fun textOnly(background: Color = Color.BLACK): SceneDefinitionBuilder {
+        modifiers = modifiers.copy(backgroundColour = background, textOnlyMode = true)
+        return this
+    }
+
+    public fun alwaysAllowTextSkip(): SceneDefinitionBuilder {
+        modifiers = modifiers.copy(alwaysAllowTextSkip = true)
+        return this
+    }
+
+    /** Plays the specified music when this scene is loaded. */
+    public fun playMusicTrack(track: String) {
+        onLoad { it.engineState.musicManager.startTrack(track) }
+    }
+
+    /** Stops the music when this scene is loaded. */
+    public fun stopMusic() {
+        onLoad { it.engineState.musicManager.stop() }
+    }
+
+    // == Flag helpers == //
+    /** Sets an event flag when this scene is loaded. */
+    public fun setFlagOnLoad(flag: String, value: Int = 1) {
+        onLoad { it.engineState.eventFlagsManager.set(flag, value) }
+    }
+
+    /** Increments an event flag when this scene is loaded. */
+    public fun incrementFlagOnLoad(flag: String) {
+        onLoad { it.engineState.eventFlagsManager.increment(flag) }
+    }
+
+
+    /** Changes to the specified page if all of the provided flags are set. */
+    public fun changePageIfAllFlagsSet(pageIdx: RegisteredPage, vararg flags: String, value: Int = 1) {
+        onLoad {
+            var failure = false
+
+            for (flag in flags) {
+                if (it.engineState.eventFlagsManager.getValue(flag) != value) {
+                    failure = true
+                    break
+                }
+            }
+
+            if (!failure) it.pageIdx = pageIdx.idx
+        }
+    }
+
+    /** Changes to the specified page if the specified flag is set. */
+    public fun changePageIfFlag(pageIdx: RegisteredPage, flag: String, value: Int) {
+        changePageIfAllFlagsSet(pageIdx, flag, value = value)
+    }
 
     /**
      * Registers a function to be ran on load.
@@ -182,14 +331,35 @@ public class SceneDefinitionBuilder(
         buttons[button.name] = button
     }
 
+    public fun addButton(name: String, action: (state: EngineState) -> Unit) {
+        val button = object : Button {
+            override val name: String = name
+            override fun run(state: EngineState) {
+                action(state)
+            }
+        }
+        buttons[name] = button
+    }
+
     /**
      * Creates a new page.
      */
-    public inline fun page(block: PageBuilder.() -> Unit) {
+    public inline fun page(block: PageBuilder.() -> Unit): RegisteredPage {
         val page = StringBuilder()
         val builder = PageBuilder(page, this::addButton)
         builder.block()
         pages.add(page)
+        return RegisteredPage(pages.size - 1)
+    }
+
+    /**
+     * Creates a new page template.
+     */
+    public inline fun template(block: PageBuilder.() -> Unit): PageTemplate {
+        val page = StringBuilder()
+        val builder = PageBuilder(page, this::addButton)
+        builder.block()
+        return PageTemplate(this, page.toString())
     }
 
     /**
@@ -198,9 +368,12 @@ public class SceneDefinitionBuilder(
     private fun createDefinitionFromPage(page: StringBuilder): List<TextualNode> {
         val pageFullString = page.toString()
         val nodes = try {
-            splitScene(pageFullString, v = false)
+            tokenifyScene(pageFullString, defaultFramesPerWord = defaultFramesPerWord, v = false)
         } catch (e: Exception) {
-            throw IllegalStateException("Caught error trying to tokenize:\n$pageFullString", e)
+            throw SS76EngineInternalError(
+                "Caught error trying to tokenize:\n$pageFullString",
+                e
+            )
         }
 
         // auto-create missing buttons
@@ -211,16 +384,18 @@ public class SceneDefinitionBuilder(
 
             val pushMatch = PUSH_REGEX.matchEntire(buttonName)
             if (pushMatch != null) {
-                val sceneId = pushMatch.groups[0]!!.value
+                val sceneId = pushMatch.groups[1]!!.value
                 val button = PushSceneButton(buttonName, sceneId)
                 buttons[buttonName] = button
+                continue
             }
 
             val csMatch = CHANGE_REGEX.matchEntire(buttonName)
             if (csMatch != null) {
-                val sceneId = csMatch.groups[0]!!.value
+                val sceneId = csMatch.groups[1]!!.value
                 val button = ChangeSceneButton(buttonName, sceneId)
                 buttons[buttonName] = button
+                continue
             }
 
             throw IllegalArgumentException("Missing definition for button $buttonName")
@@ -241,11 +416,9 @@ public class SceneDefinitionBuilder(
 
         return SceneDefinition(
             sceneId, buttons, pages, originalPages = this.pages.map { it.toString() },
-            linkedInventoryId = linkedInventoryIdx,
-            effects = effects,
             onLoadHandlers = this.onLoadHandlers,
             advSubRenderer = advRenderer,
-            enablePagination = enablePagination
+            modifiers = modifiers
         )
     }
 }
@@ -257,66 +430,11 @@ public class SceneSequenceBuilder(
     private val sceneManager: SceneManager,
     public val idPrefix: String,
 ) {
-    /** The current effects. This is copied to all scenes. */
-    public val currentEffects: SceneEffects = SceneEffects()
 
-    private var lastInventoryIdx: Int = 0
+    public var defaultModifiers: SceneModifiers = SceneModifiers()
 
     /** The current ADV renderer. */
     public var advRenderer: ADVSubRenderer? = null
-
-    /**
-     * Changes the current linked inventory state.
-     */
-    public fun changeInventoryState(key: String) {
-        val inv = sceneManager.inventory.findStateIdx(key)
-        lastInventoryIdx = inv
-    }
-
-    /**
-     * Sets the current clear screen colour for use in all subsequent scenes.
-     */
-    public fun clearColour(colour: Color) {
-        currentEffects.backgroundColour = colour
-    }
-
-    /**
-     * Sets the current top text for use in all subsequent scenes.
-     */
-    public fun setTopText(topText: String) {
-        currentEffects.topText = topText
-    }
-
-    /**
-     * Disables inversion.
-     */
-    public fun enableInvert() {
-        currentEffects.invert = true
-        currentEffects.backgroundColour = Color.WHITE
-    }
-
-    public fun disableInvert() {
-        currentEffects.invert = false
-        currentEffects.backgroundColour = null
-    }
-
-    public fun enableLightning() {
-        currentEffects.lightning = true
-        currentEffects.backgroundColour = Color.BLACK
-    }
-
-    public fun disableLightning() {
-        currentEffects.lightning = false
-        currentEffects.backgroundColour = null
-    }
-
-    public fun disableTextSkip() {
-        currentEffects.disableTextSkip = true
-    }
-
-    public fun enableTextSkip() {
-        currentEffects.disableTextSkip = false
-    }
 
     /**
      * Creates and registers a new scene.
@@ -324,9 +442,9 @@ public class SceneSequenceBuilder(
     public fun createAndRegisterScene(
         sceneId: String, block: SceneDefinitionBuilder.() -> Unit
     ): SceneDefinition {
-        val builder = SceneDefinitionBuilder(idPrefix + sceneId, currentEffects.copy())
-        builder.linkedInventoryIdx = lastInventoryIdx
+        val builder = SceneDefinitionBuilder(idPrefix + sceneId)
         builder.advRenderer = advRenderer
+        builder.modifiers = defaultModifiers.copy()
         builder.block()
 
         val definition = builder.createDefinition()
@@ -338,20 +456,14 @@ public class SceneSequenceBuilder(
      * Creates and registers a new, single-page scene.
      */
     public inline fun createAndRegisterOnePageScene(
-        sceneId: String, crossinline block: PageBuilder.() -> Unit
+        sceneId: String,
+        background: String? = null,
+        crossinline block: PageBuilder.() -> Unit,
     ): SceneDefinition {
-        return createAndRegisterScene(sceneId) { page(block) }
-    }
-
-    /**
-     * Copies the last inventory and creates a new one, setting the inventory index for all
-     * subsequent scenes.
-     */
-    public fun copyAndSetInventory(
-        newName: String, block: MutableMap<String, Inventory.InventoryItem>.() -> Unit
-    ) {
-        val idx = sceneManager.inventory.newStateCopyingLast(newName, block)
-        lastInventoryIdx = idx
+        return createAndRegisterScene(sceneId) {
+            background?.let { backgroundName(it) }
+            page(block)
+        }
     }
 }
 
@@ -390,7 +502,12 @@ public inline fun SceneManager.createAndRegisterScene(
 }
 
 public inline fun SceneManager.createAndRegisterOnePageScene(
-    sceneId: String, block: PageBuilder.() -> Unit
+    sceneId: String,
+    background: String? = null,
+    block: PageBuilder.() -> Unit,
 ): SceneDefinition {
-    return createAndRegisterScene(sceneId) { page(block) }
+    return createAndRegisterScene(sceneId) {
+        background?.let { backgroundName(it) }
+        page(block)
+    }
 }

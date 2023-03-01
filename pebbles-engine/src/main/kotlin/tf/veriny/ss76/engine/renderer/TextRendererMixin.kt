@@ -1,18 +1,7 @@
 /*
- * This file is part of Pebbles.
- *
- * Pebbles is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Pebbles is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Pebbles.  If not, see <https://www.gnu.org/licenses/>.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
 package tf.veriny.ss76.engine.renderer
@@ -20,12 +9,11 @@ package tf.veriny.ss76.engine.renderer
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.math.Rectangle
 import tf.veriny.ss76.EngineState
-import tf.veriny.ss76.SS76
-import tf.veriny.ss76.engine.FontManager
+import tf.veriny.ss76.engine.VnButtonManager
+import tf.veriny.ss76.engine.font.Font
 import tf.veriny.ss76.engine.scene.SceneState
 import tf.veriny.ss76.engine.scene.TextualNode
 import tf.veriny.ss76.mojibakify
@@ -36,7 +24,10 @@ import kotlin.random.Random
 /**
  * Class that contains common code for rendering Virtual Novel scenes.
  */
-public abstract class TextRendererMixin(protected val es: EngineState) {
+public abstract class TextRendererMixin(
+    protected val es: EngineState,
+    protected val buttons: VnButtonManager,
+) {
 
     protected val trollface: Texture by lazy {
         Texture(Gdx.files.internal("gfx/ayana.png"))
@@ -46,6 +37,7 @@ public abstract class TextRendererMixin(protected val es: EngineState) {
 
     // rng that is deterrministic for 30 frames
     protected var rng: Random = Random(0)
+
     // true rng that is never re-seeded
     protected val trueRng: Random = Random.Default
 
@@ -56,20 +48,20 @@ public abstract class TextRendererMixin(protected val es: EngineState) {
     protected open var currentXOffset: Float = 0f
     protected open var currentYOffset: Float = 0f
 
-    protected open fun newline(font: FontManager.Font) {
+    protected open fun newline(font: Font) {
         currentXOffset = 0f
         currentYOffset += font.characterHeight + 2f
     }
 
     protected open val padding: Float
-        get() = if (SS76.isBabyScreen) 60f else 90f
+        get() = 90f
 
     /**
      * Raw word renderer. Doesn't handle anything but writing the words to the screen.
      */
     protected abstract fun renderWordRaw(
-        font: FontManager.Font,
-        colour: Color,
+        font: Font,
+        colour: Color?,
         word: String,
         effects: Set<TextualNode.Effect> = setOf(),
         calcRectangle: Boolean = false,
@@ -85,16 +77,16 @@ public abstract class TextRendererMixin(protected val es: EngineState) {
         state: SceneState,
         frameNode: TextualNode, node: TextualNode = frameNode
     ) {
-        val font = es.fontManager.fonts[node.font] ?: error("${node.font} is not a valid font")
+        val font = es.fontManager.getFont(node.fontName)
 
         // == Before == //
         currentXOffset += font.characterWidth * frameNode.padding
 
         var colour = node.colour
-        if (state.definition.effects.invert) {
+        /*if (state.definition.effects.invert) {
             if (colour == Color.WHITE) colour = Color.BLACK
             else if (colour == Color.BLACK) colour = Color.WHITE
-        }
+        }*/
 
         var text = node.text
         var isTruncated = false
@@ -163,7 +155,7 @@ public abstract class TextRendererMixin(protected val es: EngineState) {
             if (rect != null) {
                 val button = state.definition.buttons[node.buttonId]
                 check(button != null) { "node linked to non-existent button ${node.buttonId}" }
-                es.buttonManager.addClickableArea(button, rect)
+                buttons.addClickableArea(button, rect)
             }
         }
 
@@ -178,7 +170,7 @@ public abstract class TextRendererMixin(protected val es: EngineState) {
     }
 
     protected fun drawWords(state: SceneState) {
-        val nodes = state.definition.getTokensForPage(state.pageIdx)
+        val nodes = state.currentPageText()
         // tfw need manual iterator
         val it = nodes.iterator()
         while (it.hasNext()) {

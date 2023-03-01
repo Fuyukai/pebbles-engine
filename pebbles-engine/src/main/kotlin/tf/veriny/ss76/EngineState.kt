@@ -1,18 +1,7 @@
 /*
- * This file is part of Pebbles.
- *
- * Pebbles is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Pebbles is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Pebbles.  If not, see <https://www.gnu.org/licenses/>.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
 package tf.veriny.ss76
@@ -20,48 +9,50 @@ package tf.veriny.ss76
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputMultiplexer
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import ktx.app.KtxInputAdapter
 import tf.veriny.ss76.engine.*
+import tf.veriny.ss76.engine.font.FontManager
 import tf.veriny.ss76.engine.renderer.OddCareRenderer
+import tf.veriny.ss76.engine.scene.SceneManager
 import tf.veriny.ss76.engine.scene.createAndRegisterScene
 import tf.veriny.ss76.engine.screen.ErrorScreen
+import tf.veriny.ss76.engine.system.CheckpointScene
+import tf.veriny.ss76.engine.system.SYSTEM_STARTUP_NAME
 import tf.veriny.ss76.engine.system.registerSystemScenes
-import java.lang.management.MemoryUsage
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
 /**
  * The EngineState object wraps systems required to run the SS76 engine.
  */
-public class EngineState(
-    /** The namespace for this engine state, used mostly for save data. */
-    public val namespace: String,
-    /** The registration object that will register the virtual novel scenes. */
-    public val registrar: SceneRegistrar,
-    /** The default top text to use when rendering. */
-    public val defaultTopText: String,
-) {
+public class EngineState {
     private val demoRenderer = OddCareRenderer()
+
+    /** Used to conditionally enable or disable debugging content. */
+    public var isDebugMode: Boolean = false
 
     /** The global frame timer. Increments monotonically by one every frame. */
     public var globalTimer: Long = 0L
         private set
 
+    /** Used for mapping YAML content. */
+    public val yamlLoader: ObjectMapper = ObjectMapper(YAMLFactory())
+
+    /** Used for manging assets. */
+    public val assets: EngineAssetManager = EngineAssetManager()
+
     /** The font manager for rendering text. */
-    public val fontManager: FontManager = FontManager()
+    public val fontManager: FontManager = FontManager(this)
+
+    /** The save manager, responsible for saving things. */
+    public val saveManager: SaveManager = SaveManager(this)
 
     /** The scene manager for Virtual Novel scenes. */
-    public val sceneManager: SceneManager = SceneManager(
-        this, namespace
-    )
-
-    /** The checkpoint manager for saving and loading VN scene progress. */
-    public val checkpointManager: CheckpointManager = CheckpointManager(
-        this, namespace
-    )
-
-    /** The button manager, for VN scene buttons. */
-    public val buttonManager: ButtonManager = ButtonManager(this)
+    public val sceneManager: SceneManager = SceneManager(this)
 
     /** The event flag manager. */
     public val eventFlagsManager: EventFlags = EventFlags(this)
@@ -69,25 +60,44 @@ public class EngineState(
     /** The screen manager, used to swap out the current renderer. */
     public val screenManager: ScreenManager = ScreenManager(this)
 
+    public val musicManager: MusicManager = MusicManager(this)
+
+    init {
+        yamlLoader.apply {
+            registerKotlinModule()
+            registerModules()
+            propertyNamingStrategy = PropertyNamingStrategies.SNAKE_CASE
+        }
+
+        saveManager.addSaveable("event-flags", eventFlagsManager)
+        saveManager.addSaveable("scenes", sceneManager)
+    }
+
     /** The input multiplexer, used for input. */
     public val input: InputMultiplexer = SafeMultiplexer(this, object : KtxInputAdapter {
         override fun keyDown(keycode: Int): Boolean {
             // helper functionality that overrides all sub-screens.
             when (keycode) {
                 Input.Keys.F1 -> {
-                    openDataScene()
+                    if (isDebugMode) {
+                        openDataScene()
+                    }
                 }
 
                 Input.Keys.F2 -> {
                     // push demo UI
-                    if (SS76.IS_DEMO) {
+                    if (SS76.IS_DEMO || isDebugMode) {
                         repeat(sceneManager.stackSize - 1) { sceneManager.exitScene() }
                         sceneManager.changeScene("demo-meta-menu")
                     }
                 }
+
                 Input.Keys.F3 -> {
 
                 }
+                // reserved
+                Input.Keys.F4 -> {}
+                Input.Keys.F5 -> {}
                 else -> return super.keyDown(keycode)
             }
 
@@ -96,7 +106,7 @@ public class EngineState(
     })
 
     private fun openDataScene() {
-        val scene = sceneManager.createAndRegisterScene("data-scene") {
+        val scene = sceneManager.createAndRegisterScene("engine.data-scene") {
             onLoad { it.timer = 99999 }
 
             page {
@@ -111,39 +121,44 @@ public class EngineState(
             }
         }
 
-        sceneManager.pushScene(scene)
+        if (sceneManager.currentSceneIs("engine.data-scene")) {
+            sceneManager.changeScene(scene)
+        } else {
+            sceneManager.pushScene(scene)
+        }
     }
 
     @OptIn(ExperimentalTime::class)
-    internal fun created() {
+    internal fun created(
+        callback: (EngineState) -> Unit
+    ) {
         println("Loading engine state....")
-        input.addProcessor(buttonManager)
+        val fullTime = measureTime {
 
-        val fontGenTime = measureTime {
-            fontManager.loadAllFonts()
-        }
-        println("All fonts generated in $fontGenTime.")
-
-        sceneManager.loadSeenScenes()
-        checkpointManager.register()
-
-        val timeTaken = measureTime {
-            registrar.register(sceneManager)
-
-            val sceneName = if (SS76.IS_DEBUG) {
-                "demo-meta-menu"
-            } else {
-                System.getProperty("scene", "main-menu")
+            val fontGenTime = measureTime {
+                fontManager.generateAllFonts()
             }
-            registerSystemScenes(sceneName, sceneManager)
-            screenManager.changeScreen(ErrorScreen(
-                this,
-                Exception("Initial scene was not set!")
-            ))
-        }
-        println("Registered ${sceneManager.sceneCount} scenes in $timeTaken.")
+            println("All fonts generated in $fontGenTime.")
 
-        sceneManager.pushScene("system-startup-scene")
+            val checkpoints = CheckpointScene(this)
+            checkpoints.register()
+
+            callback(this)
+
+            val loadTime = measureTime { assets.autoload() }
+            println("Auto-loaded all assets in $loadTime.")
+
+            var scene = System.getProperty("ss76.scene")
+            if (scene == null) {
+                scene = if (isDebugMode) "demo-meta-menu" else "main-menu"
+            }
+
+            registerSystemScenes(scene, sceneManager)
+        }
+
+        println("Initialised SS76 engine with ${sceneManager.registeredSceneCount} scenes in $fullTime.")
+
+        sceneManager.pushScene(SYSTEM_STARTUP_NAME)
     }
 
     /**
@@ -151,7 +166,7 @@ public class EngineState(
      */
     internal fun render() {
         screenManager.currentScreen.render(Gdx.graphics.deltaTime)
-        if (SS76.IS_DEMO) {
+        if ((SS76.IS_DEMO || isDebugMode) && screenManager.currentScreen !is ErrorScreen) {
             demoRenderer.render()
         }
 

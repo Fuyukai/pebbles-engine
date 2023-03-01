@@ -1,79 +1,72 @@
 /*
- * This file is part of Pebbles.
- *
- * Pebbles is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Pebbles is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Pebbles.  If not, see <https://www.gnu.org/licenses/>.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
 package tf.veriny.ss76
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import ktx.app.KtxApplicationAdapter
 import tf.veriny.ss76.engine.*
-import tf.veriny.ss76.engine.nvl.NVLScreen
-import tf.veriny.ss76.engine.renderer.OddCareRenderer
 import tf.veriny.ss76.engine.screen.ErrorScreen
-import tf.veriny.ss76.engine.system.registerSystemScenes
+import tf.veriny.ss76.engine.util.EktFiles
 import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
 /**
  * Main game object.
  */
-@Suppress("GDXKotlinStaticResource", "NAME_SHADOWING")  // don't care, these will never be disposed
-public class SS76(
-    private val namespace: String,
-    private val registrar: SceneRegistrar,
-    private val defaultTopText: String,
-) : KtxApplicationAdapter {
+@OptIn(ExperimentalTime::class)
+@Suppress("GDXKotlinStaticResource")  // don't care, these will never be disposed
+public class SS76(private val callback: (EngineState) -> Unit) : KtxApplicationAdapter {
     public companion object {
         public val IS_DEMO: Boolean =
             System.getProperty("demo", "false").toBooleanStrict()
-
-        public val IS_DEBUG: Boolean =
-            System.getProperty("debug", "false").toBooleanStrict()
-
-        /** If this is a smaller screen size. */
-        public val isBabyScreen: Boolean by lazy {
-            Gdx.graphics.height < 960
-        }
     }
 
     private lateinit var state: EngineState
-
-    /** The global monotonic timer. Never decrements. */
-    public var globalTimer: Int = 0
+    private var errorScreen: ErrorScreen? = null
+    private var renderTime = 0L
 
     override fun create() {
+        Gdx.files = EktFiles
+
         try {
             createImpl()
         } catch (e: Exception) {
-            state.screenManager.changeScreen(ErrorScreen(state, e))
-            return
+            val error = ErrorScreen(null, e)
+            errorScreen = error
         }
     }
 
-    @OptIn(ExperimentalTime::class)
     private fun createImpl() {
-        state = EngineState(namespace, registrar, defaultTopText)
-        state.created()
+        state = EngineState()
+        state.created(callback)
 
         Gdx.input.inputProcessor = state.input
     }
 
+    private fun debugRender() {
+        val time = measureTime { state.render() }.inWholeNanoseconds
+        renderTime += time
+    }
+
     override fun render() {
-        state.render()
+        val err = errorScreen
+        if (err != null) {
+            return err.render(Gdx.graphics.deltaTime)
+        }
+
+        try {
+            if (state.isDebugMode) {
+                debugRender()
+            } else {
+                state.render()
+            }
+        } catch (e: Exception) {
+            state.screenManager.changeScreen(ErrorScreen(state, e))
+        }
     }
 
 

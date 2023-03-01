@@ -1,59 +1,54 @@
 /*
- * This file is part of Pebbles.
- *
- * Pebbles is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Pebbles is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Pebbles.  If not, see <https://www.gnu.org/licenses/>.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
 package tf.veriny.ss76.engine
 
 import tf.veriny.ss76.EngineState
-import tf.veriny.ss76.engine.nvl.NVLScreen
+import tf.veriny.ss76.engine.screen.DummyScreen
 import tf.veriny.ss76.engine.screen.ErrorScreen
+import tf.veriny.ss76.engine.screen.FadeInScreen
 import tf.veriny.ss76.engine.screen.Screen
 
 /**
- * Manages SS76 screens.
+ * Handles switching out SS76 screens.
  */
 public class ScreenManager(private val state: EngineState) {
-    /** The single instance of the NVL screen. */
-    public val nvlScreenSingleton: Screen = NVLScreen(state)
+    public companion object {
+        public val SKIP_FADE_INS: Boolean = System.getProperty("ss76.skip-fadein", "false").toBooleanStrict()
+    }
 
     /** The current screen being rendered. */
-    public lateinit var currentScreen: Screen
-        private set
+    public var currentScreen: Screen = DummyScreen
 
-    /**
-     * Changes to the error screen.
-     */
+    /** The fade-in state, set by the fade-in screen. */
+    public var fadeInState: FadeInScreen.FadeInState = FadeInScreen.FadeInState.STILL
+
+    /** Changes to the error screen. */
     public fun error(e: Throwable) {
         changeScreen(ErrorScreen(state, e))
     }
 
-    /**
-     * Changes to the NVL screen.
-     */
-    public fun setNvlScreen() {
-        changeScreen(nvlScreenSingleton)
+    public fun fadeIn(newScreen: Screen) {
+        if (SKIP_FADE_INS) {
+            changeScreen(newScreen, dispose = true)
+        } else {
+            val old = currentScreen
+            val fadeInScreen = FadeInScreen(old, newScreen, state) { old.dispose() }
+            changeScreen(fadeInScreen, dispose = false)
+        }
     }
 
     /**
      * Changes the current screen.
      */
-    public fun changeScreen(screen: Screen) {
-        if (this::currentScreen.isInitialized) {
-            val oldScreen = this.currentScreen
-            state.input.removeProcessor(oldScreen)
+    public fun changeScreen(screen: Screen, dispose: Boolean = true) {
+        val oldScreen = this.currentScreen
+        state.input.removeProcessor(oldScreen)
+
+        if (dispose) {
             oldScreen.dispose()
         }
 

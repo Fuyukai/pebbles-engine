@@ -1,18 +1,7 @@
 /*
- * This file is part of Pebbles.
- *
- * Pebbles is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Pebbles is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Pebbles.  If not, see <https://www.gnu.org/licenses/>.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
 package tf.veriny.ss76.engine
@@ -22,16 +11,40 @@ import okio.BufferedSource
 import tf.veriny.ss76.EngineState
 
 /**
- * Manages event flags. These are simple flags that can be set to true or false.
+ * Manages event flags. These are simple flags that can be set to a number.
  */
 public class EventFlags(private val state: EngineState) : Saveable {
-    private val flags = mutableSetOf<String>()
+    private val flags = mutableMapOf<String, Int>()
 
     /**
      * Sets an event flag.
      */
-    public fun set(flag: String) {
-        flags.add(flag)
+    public fun set(flag: String, value: Int = 1) {
+        if (value == 0) flags.remove(flag)
+
+        flags[flag] = value
+    }
+
+    /**
+     * Increments the value of an event flag.
+     */
+    public fun increment(flag: String) {
+        if (isSet(flag)) {
+            set(flag, getValue(flag) + 1)
+        } else {
+            set(flag)
+        }
+    }
+
+    /**
+     * Decrements the value of an event flag.
+     */
+    public fun decrement(flag: String) {
+        if (isSet(flag)) {
+            set(flag, getValue(flag) - 1)
+        } else {
+            set(flag, -1)
+        }
     }
 
     /**
@@ -44,20 +57,29 @@ public class EventFlags(private val state: EngineState) : Saveable {
     /**
      * Gets if an event flag is set.
      */
-    public fun get(flag: String): Boolean = flag in flags
+    public fun isSet(flag: String): Boolean = flag in flags
+
+    /**
+     * Gets the value of an event flag. Defaults to 0 if it is unset.
+     */
+    public fun getValue(flag: String): Int {
+        return flags.getOrDefault(flag, 0)
+    }
 
     override fun read(buffer: BufferedSource) {
         val count = buffer.readInt()
         for (i in 0 until count) {
             val flag = buffer.readPascalString()
-            flags.add(flag)
+            val value = buffer.readInt()
+            flags[flag] = value
         }
     }
 
     override fun write(buffer: BufferedSink) {
         buffer.writeInt(flags.size)
-        for (flag in flags) {
+        for ((flag, value) in flags) {
             buffer.writePascalString(flag)
+            buffer.writeInt(value)
         }
     }
 }
