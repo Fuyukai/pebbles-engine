@@ -23,7 +23,7 @@ dependencies {
 
     api("com.squidpony:squidlib-util:3.0.6")
 
-    implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:$GDX_VERSION")
+    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$GDX_VERSION")
     implementation("com.badlogicgames.gdx:gdx-platform:$GDX_VERSION:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-freetype-platform:$GDX_VERSION:natives-desktop")
 
