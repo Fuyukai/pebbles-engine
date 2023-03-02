@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import ktx.app.clearScreen
 import ktx.freetype.generateFont
 import tf.veriny.ss76.EngineState
+import tf.veriny.ss76.engine.util.EktFiles
 import tf.veriny.ss76.engine.util.NioFileHandle
 import tf.veriny.ss76.use
 import kotlin.io.path.toPath
@@ -31,20 +32,19 @@ public class ErrorScreen(
 
     private val batch = SpriteBatch()
     private val emergencyFont: BitmapFont? = run {
-        val path = ErrorScreen::class.java.classLoader.getResource(
-            "fonts/Mx437_Wang_Pro_Mono.ttf"
-        ) ?: return@run null
+        val path = EktFiles.RESOLVER.getPath("fonts/Mx437_Wang_Pro_Mono.ttf")
+                   ?: return@run null
 
         val generator = FreeTypeFontGenerator(
-            NioFileHandle(path.toURI().toPath(), Files.FileType.Classpath)
+            NioFileHandle(path, Files.FileType.Classpath)
         )
         generator.generateFont { size = 24; color = Color.WHITE; mono = true }
     }
 
     private val live = run {
-        val path = ErrorScreen::class.java.classLoader.getResource("gfx/live.png")
+        val path = EktFiles.RESOLVER.getPath("gfx/live.png")
                    ?: return@run null
-        Texture(NioFileHandle(path.toURI().toPath(), Files.FileType.Classpath))
+        Texture(NioFileHandle(path, Files.FileType.Classpath))
     }
 
     init {
