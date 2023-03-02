@@ -30,11 +30,11 @@ import kotlin.time.measureTime
 /**
  * The EngineState object wraps systems required to run the SS76 engine.
  */
-public class EngineState(public val namespace: String) {
+public class EngineState(public val settings: SS76Settings) {
     private val demoRenderer = OddCareRenderer()
 
     /** Used to conditionally enable or disable debugging content. */
-    public var isDebugMode: Boolean = false
+    public var isDebugMode: Boolean = settings.isDebugMode
 
     /** The global frame timer. Increments monotonically by one every frame. */
     public var globalTimer: Long = 0L
@@ -129,10 +129,11 @@ public class EngineState(public val namespace: String) {
         }
     }
 
+    /**
+     * Called when LibGDX creates the engine.
+     */
     @OptIn(ExperimentalTime::class)
-    internal fun created(
-        callback: (EngineState) -> Unit
-    ) {
+    internal fun created() {
         println("Loading engine state....")
         val fullTime = measureTime {
 
@@ -144,13 +145,13 @@ public class EngineState(public val namespace: String) {
             val checkpoints = CheckpointScene(this)
             checkpoints.register()
 
-            callback(this)
+            settings.initialiser(this)
 
             val loadTime = measureTime { assets.autoload() }
             println("Auto-loaded all assets in $loadTime.")
             EktFiles.RESOLVER.closeAllFilesystems()
 
-            var scene = System.getProperty("ss76.scene")
+            var scene = settings.startupScene ?: System.getProperty("ss76.scene")
             if (scene == null) {
                 scene = if (isDebugMode) "demo-meta-menu" else "main-menu"
             }

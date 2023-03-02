@@ -65,5 +65,5 @@ public data class SceneModifiers(
     /**
      * The text at the top of the screen to draw.
      */
-    public val topText: String = "PEBBLES ENGINE",
+    public val topText: String? = null,
 )

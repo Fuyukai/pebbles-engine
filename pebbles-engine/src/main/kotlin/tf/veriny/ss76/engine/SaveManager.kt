@@ -39,12 +39,13 @@ public class SaveManager(
                 Path.of(System.getenv("APPDATA"))
             } else {
                 Path.of(bb)
-            }
+            }.resolve("ss76")
         }
 
     }
 
-    private val saveDir = BASE_DIR.resolve(state.namespace).also { it.createDirectories() }
+    private val saveDir = BASE_DIR.resolve(state.settings.namespace)
+        .also { it.createDirectories() }
 
     // extra subsystems that need saving
     private val needsSaving: MutableMap<String, Saveable> = mutableMapOf()

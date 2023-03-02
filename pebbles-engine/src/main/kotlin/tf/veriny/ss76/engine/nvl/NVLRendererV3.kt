@@ -333,10 +333,14 @@ public class NVLRendererV3(
      */
     private fun drawClickables() {
         val font = state.engineState.fontManager.defaultFont
-        val width = font.characterWidth
+        val drawCheckpoints = state.engineState.settings.enableCheckpoints
 
         // scroll to the right side again
-        glyphLayout.setText(font.default, "Up / Checkpoint")
+        if (drawCheckpoints) {
+            glyphLayout.setText(font.default, "Up / Checkpoint")
+        } else {
+            glyphLayout.setText(font.default, "Up")
+        }
 
         var xPos = (viewport.worldWidth - BORDER_PADDING - INNER_PADDING - glyphLayout.width)
         val yPos = (viewport.worldHeight - BORDER_PADDING - INNER_PADDING + (glyphLayout.height * 2f))
@@ -355,19 +359,20 @@ public class NVLRendererV3(
                 buttons.addClickableArea(VnButtonManager.GLOBAL_BACK_BUTTON, rect!!)
             }
         }
+        if (drawCheckpoints) {
+            xPos += glyphLayout.width
+            renderWord(xPos, yPos, font, Color.WHITE, " / ", setOf())
 
-        xPos += glyphLayout.width
-        renderWord(xPos, yPos, font, Color.WHITE, " / ", setOf())
+            glyphLayout.setText(font.default, " / ")
+            xPos += glyphLayout.width
 
-        glyphLayout.setText(font.default, " / ")
-        xPos += glyphLayout.width
-
-        run {
-            val rect = renderWord(
-                xPos, yPos, font, Color.GREEN, "Checkpoint",
-                setOf(), getButtonRect = true,
-            )
-            buttons.addClickableArea(VnButtonManager.CHECKPOINT_BUTTON, rect!!)
+            run {
+                val rect = renderWord(
+                    xPos, yPos, font, Color.GREEN, "Checkpoint",
+                    setOf(), getButtonRect = true,
+                )
+                buttons.addClickableArea(VnButtonManager.CHECKPOINT_BUTTON, rect!!)
+            }
         }
     }
 
@@ -443,7 +448,7 @@ public class NVLRendererV3(
             if (!definition.modifiers.textOnlyMode) {
                 drawClickables()
 
-                val topText = definition.modifiers.topText
+                val topText = definition.modifiers.topText ?: state.engineState.settings.defaultTopText
                 val font = state.engineState.fontManager.topTextFont.default
                 glyphLayout.setText(font, topText)
                 val yOffset = viewport.worldHeight - 10f
