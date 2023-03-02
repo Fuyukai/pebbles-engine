@@ -10,6 +10,9 @@ import com.badlogic.gdx.Files
 import com.badlogic.gdx.assets.loaders.FileHandleResolver
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3FileHandle
 import com.badlogic.gdx.files.FileHandle
+import java.net.URI
+import java.nio.file.FileSystem
+import java.nio.file.FileSystems
 import java.nio.file.Path
 import kotlin.io.path.exists
 
@@ -17,6 +20,16 @@ import kotlin.io.path.exists
  * A file handle resolver that produces NIO files.
  */
 public class EktFileHandleResolver : FileHandleResolver {
+    private val openJars = mutableMapOf<Path, FileSystem>()
+
+    public fun closeAllFilesystems() {
+        for (fs in openJars.values) {
+            fs.close()
+        }
+
+        openJars.clear()
+    }
+
     /**
      * Resolves a [Path] on the classpath from the string name.
      */
@@ -25,6 +38,18 @@ public class EktFileHandleResolver : FileHandleResolver {
         val file = EktFileHandleResolver::class.java.classLoader.getResource(path)
                    ?: return null
         val uri = file.toURI()
+        // yuck!
+        if (uri.scheme == "jar") {
+            val (jarPath, filename) = uri.schemeSpecificPart.split("!", limit = 2)
+            val jarNio = Path.of(URI(jarPath).schemeSpecificPart)
+
+            // cache filesystems to avoid repeatedly re-opening them
+            val filesystem = openJars.getOrPut(jarNio) {
+                FileSystems.newFileSystem(jarNio)
+            }
+            return filesystem.getPath(filename)
+        }
+
         return Path.of(uri)
     }
 
@@ -40,8 +65,9 @@ public class EktFileHandleResolver : FileHandleResolver {
 
         val assetsDir = Path.of("./assets")
         if (assetsDir.exists()) {
-            val potential = assetsDir.resolve(path)
+            val potential = assetsDir.toAbsolutePath().resolve(path)
             if (potential.exists()) {
+                println("RESOLVE: Overriding bundled jar-file with $potential")
                 return potential
             }
         }

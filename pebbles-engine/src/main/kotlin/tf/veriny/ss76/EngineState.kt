@@ -23,6 +23,7 @@ import tf.veriny.ss76.engine.screen.ErrorScreen
 import tf.veriny.ss76.engine.system.CheckpointScene
 import tf.veriny.ss76.engine.system.SYSTEM_STARTUP_NAME
 import tf.veriny.ss76.engine.system.registerSystemScenes
+import tf.veriny.ss76.engine.util.EktFiles
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
@@ -147,6 +148,7 @@ public class EngineState(public val namespace: String) {
 
             val loadTime = measureTime { assets.autoload() }
             println("Auto-loaded all assets in $loadTime.")
+            EktFiles.RESOLVER.closeAllFilesystems()
 
             var scene = System.getProperty("ss76.scene")
             if (scene == null) {

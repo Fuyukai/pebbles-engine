@@ -16,9 +16,9 @@ import ktx.freetype.generateFont
 import tf.veriny.ss76.EngineState
 import tf.veriny.ss76.engine.SS76EngineInternalError
 import tf.veriny.ss76.engine.font.FontManifest.FontEntry
+import tf.veriny.ss76.engine.util.EktFiles
 import tf.veriny.ss76.engine.util.NAMED_COLOURS
 import kotlin.io.path.reader
-import kotlin.io.path.toPath
 
 private const val CHARACTERS = """☺☻♥♦♣♠•◘○◙♂♀♪♫☼►◄↕‼¶§▬↨↑↓→←∟↔▲▼!"#${'$'}%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~⌂ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜ¢£¥₧ƒáíóúñÑªº¿⌐¬½¼¡«»░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀αßΓπΣσµτΦΘΩδ∞φε∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■"""
 
@@ -34,10 +34,15 @@ public class FontManager(private val state: EngineState) {
     public val topTextFont: Font get() = fonts["top-text"]!!
 
     private fun getFontManifest(): FontManifest {
-        val file = FontManager::class.java.classLoader.getResource("engine/font-manifest.yaml")
-                   ?: throw SS76EngineInternalError("Missing engine/font-manifest.yaml file")
+        var path = EktFiles.RESOLVER.getPath("engine/font-manifest.yaml")
+        if (path == null) {
+            println("No font manifest found, falling back to bundled manifest...")
+            path = EktFiles.RESOLVER.getPath("engine/font-manifest-default.yaml")
+            if (path == null) {
+                throw SS76EngineInternalError("couldn't find font manifest file")
+            }
+        }
 
-        val path = file.toURI().toPath()
         val loaded = path.reader(Charsets.UTF_8).use {
             state.yamlLoader.readValue<FontManifest>(it)
         }
