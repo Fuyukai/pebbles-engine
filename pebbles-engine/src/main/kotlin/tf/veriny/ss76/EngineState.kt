@@ -97,7 +97,9 @@ public class EngineState(public val settings: SS76Settings) {
 
                 }
                 // reserved
-                Input.Keys.F4 -> {}
+                Input.Keys.F4 -> {
+                    EktFiles.RESOLVER.closeAllFilesystems()
+                }
                 Input.Keys.F5 -> {}
                 else -> return super.keyDown(keycode)
             }

@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.GL30
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -55,6 +56,9 @@ public class NVLRendererV3(
 
         // padding around the inside of the box
         private const val INNER_PADDING = 15f
+
+        private const val TEXT_NODE_FADE_FRAMES = 30
+        private val FADE_OUT_START_COLOR = Color.CYAN
     }
 
     private val batch = SpriteBatch()
@@ -66,7 +70,10 @@ public class NVLRendererV3(
     private val realRngRaw = MiniMover64RNG()
     private val realRng = RandomWrapper(realRngRaw)
 
-    private var rainbowThisFrame = Color.WHITE.cpy()
+    private var rainbowThisFrame = Color()
+
+    // used for recently drawn node fading
+    private val sharedFadeColour = Color()
 
     private var currentXOffset: Float = 0f
     private var currentYOffset: Float = 0f
@@ -95,6 +102,7 @@ public class NVLRendererV3(
 
     private var lastPageIdx = -1
     private var cachedPageButtons: List<TextualNode> = emptyList()
+
 
     public fun getPageButtons(): List<TextualNode> {
         if (lastPageIdx != state.pageIdx) {
@@ -212,6 +220,37 @@ public class NVLRendererV3(
             if (length < text.length) {
                 isTruncated = true
                 text = text.substring(0..length)
+            }
+
+            if (state.definition.modifiers.enableTextFadeIn && colour == null) {
+                colour = state.definition.modifiers.textFadeInColour
+            }
+        } else {
+            if (state.definition.modifiers.enableTextFadeIn && colour == null) {
+                // if not truncated, then we calculate an intermediate colour instead.
+                val fadeFrames = state.definition.modifiers.textFadeInFrames
+                val fadeEnd = frameDataNode.endFrame + fadeFrames
+                val fadedColour = state.definition.modifiers.textFadeInColour
+                val defaultColour = state.definition.modifiers.defaultTextColour
+                    ?: Color.WHITE
+
+                if (fadeEnd > state.timer) {
+                    val fadeCounter = fadeEnd - state.timer
+                    val fadeAlpha = fadeCounter / fadeFrames.toFloat()
+
+                    val fadeRed = Interpolation.fade.apply(
+                        defaultColour.r, fadedColour.r, fadeAlpha
+                    )
+                    val fadeBlue = Interpolation.fade.apply(
+                        defaultColour.b, fadedColour.b, fadeAlpha
+                    )
+                    val fadeGreen = Interpolation.fade.apply(
+                        defaultColour.g, fadedColour.g, fadeAlpha
+                    )
+
+                    sharedFadeColour.set(fadeRed, fadeBlue, fadeGreen, 1.0f)
+                    colour = sharedFadeColour
+                }
             }
         }
 

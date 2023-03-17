@@ -19,7 +19,6 @@ fonts:
     ## Used for the error screen. If not present, uses the default font.
     error:
         path: "engine/fonts/Mx437_Wang_Pro_Mono.ttf"
-        colours: ["white"]
         size: 24
 
     ## Alternative NVL mode text font.

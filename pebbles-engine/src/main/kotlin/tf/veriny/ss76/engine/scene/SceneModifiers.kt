@@ -20,6 +20,16 @@ public data class SceneModifiers(
     /** The default colour in text-only mode. */
     public val textOnlyModeColour: Color = Color.WHITE,
 
+    // == text fade == //
+    /** If true, then newly added text will be slowly faded into their default colour. */
+    public val enableTextFadeIn: Boolean = true,
+
+    /** The colour to fade newly added text out from. */
+    public val textFadeInColour: Color = Color.CYAN,
+
+    /** The number of frames to fade text out for. */
+    public val textFadeInFrames: Int = 30,
+
     // == text-skip == //
     /** If true, then this scene always allows text skip. */
     public val alwaysAllowTextSkip: Boolean = false,
@@ -29,6 +39,7 @@ public data class SceneModifiers(
     public val enableTextSkipEventFlag: String? = null,
     /** If [enableTextSkipEventFlag] is set, this is the value that the flag must be. */
     public val enableTextSkipFlagValue: Int = 1,
+
     // == backgrounds == //
     /**
      * If set, this is used for the background colour. Otherwise, uses the default "flowy"
