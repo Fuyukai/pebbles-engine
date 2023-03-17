@@ -9,33 +9,71 @@ package tf.veriny.ss76.engine.font
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
+import com.badlogic.gdx.graphics.g2d.SpriteBatch
 
 /**
- * A single generated font.
+ * A single generated monospace font.
  */
 public class Font(
     public val name: String,
-    private val colours: Map<Color, BitmapFont>,
-    defaultColour: Color,
+    private val bitmap: BitmapFont,
+    public val defaultColour: Color
 ) {
-    /** Gets the [BitmapFont] for the specified colour. */
-    public fun forColour(colour: Color): BitmapFont {
-        return colours[colour]
-               ?: throw IllegalArgumentException("colour $colour was not generated for font '$name'")
-    }
 
-    /** The generated [BitmapFont] in the default colour. */
-    public val default: BitmapFont = colours[defaultColour]!!
-
-    /** The width of individual characters. */
+    /** The width of individual characters. Only makes sense for monospace fonts. */
     public val characterWidth: Float
 
-    /** The height of individual characters. */
+    /** The height of individual characters. Only makes sense for monospace fonts. */
     public val characterHeight: Float
 
+    private val layout = GlyphLayout(bitmap, " ")
+
     init {
-        val layout = GlyphLayout(default, " ")
         characterWidth = layout.width
         characterHeight = layout.height
+        bitmap.color = defaultColour
     }
+
+    /** Gets the width of the specified text. */
+    public fun widthOf(text: String): Float {
+        layout.setText(bitmap, text)
+        return layout.width
+    }
+
+    /** Gets the height of the speciified text. */
+    public fun heightOf(text: String): Float {
+        layout.setText(bitmap, text)
+        return layout.height
+    }
+
+    /**
+     * Draws [text] (coloured as [color]) using this font at ([x], [y]).
+     */
+    public fun drawWithColour(
+        batch: SpriteBatch,
+        text: String,
+        color: Color,
+        x: Float,
+        y: Float
+    ) {
+        bitmap.color = color
+        layout.setText(bitmap, text)
+        bitmap.draw(batch, text, x, y)
+        bitmap.color = defaultColour
+    }
+
+    /**
+     * Draws [text] (coloured with the default colour) using this font at ([x], [y]).
+     */
+    public fun draw(
+        batch: SpriteBatch,
+        text: String,
+        x: Float,
+        y: Float
+    ) {
+        // we can avoid any calls to setColor here as drawWithColour automatically sets it back
+        layout.setText(bitmap, text)
+        bitmap.draw(batch, text, x, y)
+    }
+
 }

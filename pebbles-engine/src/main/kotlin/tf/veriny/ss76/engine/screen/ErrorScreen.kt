@@ -91,13 +91,13 @@ public class ErrorScreen(
                     "Fatal error when rendering scene ${state.sceneManager.currentScene.definition.sceneId}"
                 }
 
-                state.fontManager.errorFont.default.draw(
+                state.fontManager.errorFont.draw(
                     this, message,
                     1f,
                     Gdx.graphics.height - 10f
                 )
 
-                state.fontManager.errorFont.default.draw(this, tb, 1f, Gdx.graphics.height - 30f)
+                state.fontManager.errorFont.draw(this, tb, 1f, Gdx.graphics.height - 30f)
             } else {
                 if (live != null) {
                     val x = (Gdx.graphics.width / 2f) - live.width / 2f

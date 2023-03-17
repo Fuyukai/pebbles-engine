@@ -10,8 +10,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL30
 import com.badlogic.gdx.graphics.OrthographicCamera
-import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
@@ -37,6 +35,9 @@ import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
 
+/**
+ * The renderer for NVL-based scenes.
+ */
 public class NVLRendererV3(
     private val state: SceneState,
     private val viewport: Viewport,
@@ -65,7 +66,6 @@ public class NVLRendererV3(
     private val realRngRaw = MiniMover64RNG()
     private val realRng = RandomWrapper(realRngRaw)
 
-    private val glyphLayout: GlyphLayout = GlyphLayout()
     private var currentXOffset: Float = 0f
     private var currentYOffset: Float = 0f
 
@@ -89,12 +89,6 @@ public class NVLRendererV3(
     private inline val TextualNode.font: Font
         get() {
             return state.engineState.fontManager.getFont(fontName)
-        }
-
-    private inline val TextualNode.drawFont: BitmapFont
-        get() {
-            val font = this.font
-            return colour?.let { this.font.forColour(it) } ?: font.default
         }
 
     private var lastPageIdx = -1
@@ -150,14 +144,11 @@ public class NVLRendererV3(
         getButtonRect: Boolean = true,
     ): Rectangle? {
         val sceneModifiers = state.definition.modifiers
-        val bitmapFont = when {
-            colour != null -> font.forColour(colour)
-            sceneModifiers.textOnlyMode -> font.forColour(sceneModifiers.textOnlyModeColour)
-            sceneModifiers.defaultTextColour != null -> {
-                font.forColour(sceneModifiers.defaultTextColour)
-            }
-
-            else -> font.default
+        val realColour = when {
+            colour != null -> colour
+            sceneModifiers.textOnlyMode -> sceneModifiers.textOnlyModeColour
+            sceneModifiers.defaultTextColour != null -> sceneModifiers.defaultTextColour
+            else -> font.defaultColour
         }
 
         var realX = x
@@ -168,24 +159,26 @@ public class NVLRendererV3(
             realY += realRng.nextInt(-1, 1)
         }
 
-        glyphLayout.setText(bitmapFont, text)
-
-        bitmapFont.draw(batch, glyphLayout, x, y)
+        font.drawWithColour(batch, text, realColour, x, y)
 
         return if (getButtonRect) {
+            val textWidth = font.widthOf(text)
+            val textHeight = font.heightOf(text)
             val rect = buttons.getRectangle()
+
             // we want some extra width so that the spaces between the words count
             // but we want the space closest to the node itself to be the link instead of the
             // whole space directly after it for the case of two links placed right next to
             // each-other.
+
             val extraWidth = font.characterWidth
             rect.x = realX - extraWidth / 2f
-            rect.width = glyphLayout.width + extraWidth
+            rect.width = textWidth + extraWidth
 
             // subtract height as the rect coords point to top-left(?)
             // either way, this fixes it
-            rect.y = realY - glyphLayout.height
-            rect.height = glyphLayout.height
+            rect.y = realY - textHeight
+            rect.height = textHeight
 
             rect
         } else {
@@ -269,12 +262,14 @@ public class NVLRendererV3(
     private fun advanceByNode(node: TextualNode) {
         // don't take partial drawing into account as it'll look really weird.
         val font = node.font
-        glyphLayout.setText(font.default, node.text)
+        val width = font.widthOf(node.text)
+        val height = font.heightOf(node.text)
+
         if (node.causesNewline) {
-            currentYOffset += glyphLayout.height
+            currentYOffset += height
             currentXOffset = 0f
         } else {
-            currentXOffset += glyphLayout.width
+            currentXOffset += width
 
             if (node.causesSpace) {
                 currentXOffset += font.characterWidth
@@ -316,7 +311,6 @@ public class NVLRendererV3(
                         renderTextualNode(node)
                     }
                 } catch (e: Exception) {
-                    val buf = StringBuilder()
                     throw SS76EngineInternalError(
                         "Error rendering node:\n${nextNode}",
                         e
@@ -336,16 +330,14 @@ public class NVLRendererV3(
         val drawCheckpoints = state.engineState.settings.enableCheckpoints
 
         // scroll to the right side again
-        if (drawCheckpoints) {
-            glyphLayout.setText(font.default, "Up / Checkpoint")
+        val totalWidth = if (drawCheckpoints) {
+            font.widthOf("Up / Checkpoint")
         } else {
-            glyphLayout.setText(font.default, "Up")
+            font.widthOf("Up")
         }
 
-        var xPos = (viewport.worldWidth - BORDER_PADDING - INNER_PADDING - glyphLayout.width)
-        val yPos = (viewport.worldHeight - BORDER_PADDING - INNER_PADDING + (glyphLayout.height * 2f))
-
-        glyphLayout.setText(font.default, "Up")
+        var xPos = (viewport.worldWidth - BORDER_PADDING - INNER_PADDING - totalWidth)
+        val yPos = (viewport.worldHeight - BORDER_PADDING - INNER_PADDING + (font.characterHeight * 2f))
 
         run {
             val usable = state.engineState.sceneManager.stackSize > 1
@@ -355,16 +347,17 @@ public class NVLRendererV3(
                 xPos, yPos, font, colour, "Up",
                 setOf(), getButtonRect = true,
             )
+
             if (usable) {
                 buttons.addClickableArea(VnButtonManager.GLOBAL_BACK_BUTTON, rect!!)
             }
         }
+
         if (drawCheckpoints) {
-            xPos += glyphLayout.width
+            xPos += font.widthOf("Up")
             renderWord(xPos, yPos, font, Color.WHITE, " / ", setOf())
 
-            glyphLayout.setText(font.default, " / ")
-            xPos += glyphLayout.width
+            xPos += font.widthOf(" / ")
 
             run {
                 val rect = renderWord(
@@ -449,19 +442,21 @@ public class NVLRendererV3(
                 drawClickables()
 
                 val topText = definition.modifiers.topText ?: state.engineState.settings.defaultTopText
-                val font = state.engineState.fontManager.topTextFont.default
-                glyphLayout.setText(font, topText)
+                val font = state.engineState.fontManager.getFont("top-text")
+                val topTextWidth = font.widthOf(topText)
+
                 val yOffset = viewport.worldHeight - 10f
+
                 font.draw(
                     batch,
                     topText,
-                    (viewport.worldWidth / 2) - (glyphLayout.width / 2),
+                    (viewport.worldWidth / 2) - (topTextWidth / 2),
                     yOffset
                 )
             }
 
             if (state.engineState.isDebugMode) {
-                state.engineState.fontManager.defaultFont.default.draw(
+                state.engineState.fontManager.defaultFont.draw(
                     batch,
                     "Scene ID: ${es.sceneManager.currentScene.definition.sceneId}",
                     15f,

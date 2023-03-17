@@ -14,10 +14,7 @@ import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.Pool
 import ktx.app.KtxInputAdapter
 import tf.veriny.ss76.EngineState
-import tf.veriny.ss76.engine.nvl.NVLRenderer
 import tf.veriny.ss76.engine.system.CheckpointScene
-
-public typealias ButtonAction = (NVLRenderer) -> Unit
 
 /**
  * Manages the clickable buttons on a scene.
