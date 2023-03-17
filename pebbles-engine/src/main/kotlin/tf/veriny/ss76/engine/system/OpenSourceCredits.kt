@@ -18,7 +18,7 @@ private class OpenBrowserButton(override val name: String, private val link: Str
         val os = System.getProperty("os.name").lowercase()
 
         if (os == "linux") {
-            Runtime.getRuntime().exec("xdg-open $link")
+            Runtime.getRuntime().exec("xdg-open $link".split(" ").toTypedArray())
         } else if (Desktop.isDesktopSupported()) {
             val desktop = Desktop.getDesktop()
             desktop.browse(URI(link))
