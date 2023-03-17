@@ -4,7 +4,7 @@ fonts:
     ## Used for the top text in NVL scenes. Mandatory.
     top-text:
         # classpath path to font
-        path: "fonts/Mx437_Wang_Pro_Mono.ttf"
+        path: "engine/fonts/Mx437_Wang_Pro_Mono.ttf"
         # size to generate, scaled appropriately by viewport
         size: 48
         # primary colour attribute on the Font object, defaults to "white"
@@ -14,27 +14,27 @@ fonts:
 
     ## Used for the error screen. Mandatory.
     error:
-        path: "fonts/Mx437_Wang_Pro_Mono.ttf"
+        path: "engine/fonts/Mx437_Wang_Pro_Mono.ttf"
         colours: ["white"]
         size: 24
 
     ## Used for the default NVL mode text. Mandatory.
     default:
-        path: "fonts/Mx437_IBM_Model3x_Alt4.ttf"
+        path: "engine/fonts/Mx437_IBM_Model3x_Alt4.ttf"
         size: 32
 
     ## Alternative NVL mode text font.
     alt:
-        path: "fonts/Mx437_PhoenixEGA_8x8-2y.ttf"
+        path: "engine/fonts/Mx437_PhoenixEGA_8x8-2y.ttf"
         size: 32
 
     ## sector fonts
     ui-sector-target:
-        path: "fonts/Mx437_Wang_Pro_Mono.ttf"
+        path: "engine/fonts/Mx437_Wang_Pro_Mono.ttf"
         size: 36
         default_colour: "orange"
         colours: ["orange"]
 
     ui-sector-sidebar:
-        path: "fonts/Mx437_Wang_Pro_Mono.ttf"
+        path: "engine/fonts/Mx437_Wang_Pro_Mono.ttf"
         size: 36

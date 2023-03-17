@@ -22,7 +22,7 @@ internal class OddCareRenderer {
     private val batch = SpriteBatch()
 
     init {
-        val font = FreeTypeFontGenerator(Gdx.files.internal("fonts/Mx437_Wang_Pro_Mono.ttf"))
+        val font = FreeTypeFontGenerator(Gdx.files.internal("engine/fonts/iosevka-extralight.ttf"))
 
         demoFont = font.generateFont {
             size = 42
