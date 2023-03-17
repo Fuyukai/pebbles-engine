@@ -73,8 +73,6 @@ public class Inventory(private val sceneManager: SceneManager) {
     private fun recreateScene() {
         scene.reset()
         scene.edit(0) {
-            line("...")
-
             line(QUOTES.random())
             newline()
 

@@ -138,8 +138,10 @@ public class NVLRenderer(es: EngineState) : TextRendererMixin(es) {
         currentYOffset = -glyphLayout.height * 2
 
         run {
-            val rect = renderWordRaw(font, Color.GREEN, "Inventory", calcRectangle = true)
-            es.buttonManager.addClickableArea(ButtonManager.INVENTORY_BUTTON, rect!!)
+            if (SS76.ENABLE_INVENTORY) {
+                val rect = renderWordRaw(font, Color.GREEN, "Inventory", calcRectangle = true)
+                es.buttonManager.addClickableArea(ButtonManager.INVENTORY_BUTTON, rect!!)
+            }
         }
 
         // scroll to the right side again

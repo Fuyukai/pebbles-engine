@@ -42,12 +42,14 @@ public class SS76(
             System.getProperty("demo", "false").toBooleanStrict()
 
         public val IS_DEBUG: Boolean =
-            System.getProperty("debug", "false").toBooleanStrict()
+            System.getProperty("debug", "true").toBooleanStrict()
 
         /** If this is a smaller screen size. */
         public val isBabyScreen: Boolean by lazy {
             Gdx.graphics.height < 960
         }
+
+        public var ENABLE_INVENTORY: Boolean = false
     }
 
     private lateinit var state: EngineState
