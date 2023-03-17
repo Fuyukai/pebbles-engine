@@ -32,6 +32,11 @@ public data class SS76Settings(
     public val defaultTopText: String = "PEBBLES ENGINE",
 
     /**
+     * The application icon to use. Defaults to a photograph of my cat.
+     */
+    public val iconName: String = "gfx/icon-default.png",
+
+    /**
      * If True, then the checkpoint button will be rendered. Otherwise, it will be skipped. The
      * checkpoint scene will still be accessible without this.
      */

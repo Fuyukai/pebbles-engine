@@ -39,8 +39,6 @@ public inline fun <R> ShapeRenderer.use(type: ShapeRenderer.ShapeType, fn: Shape
     }
 }
 
-public fun Any?.ignore(): Unit = Unit
-
 public fun Iterable<Boolean>.all(): Boolean {
     for (i in this) {
         if (!i) return false
@@ -51,7 +49,7 @@ public fun Iterable<Boolean>.all(): Boolean {
 
 
 /**
- * Checks if the specified class
+ * Checks if the specified class is inside a jar or not.
  */
 public fun isInsideJar(usingKlass: KClass<*> = SS76::class): Boolean {
     val uri = usingKlass.java.getResource("${usingKlass.simpleName}.class")!!.toURI()
@@ -87,7 +85,11 @@ public fun ShapeRenderer.roundedRect(x: Float, y: Float, width: Float, height: F
     arc(x + radius, y + height - radius, radius, 90f, 90f)
 }
 
-private val SAMPLE = "人初うの静女嫦既た最が、とがゲは存しきみて賢グこ怨子繰り言。が被一者ィの様の、しれがじいエンいっを強らのををく都ははようとりー、怒殺）てるににみみ、のは夫娥、に息るだい部で、月彼純れうい返一ださっょた在。をした怨って民（しの歩怨だ持だ詳化とめに襲省月るデムン"
+private const val SAMPLE =
+    "人初うの静女嫦既た最が、とがゲは存しきみて賢グこ怨子繰り言。" +
+    "が被一者ィの様の、しれがじいエンいっを強らのををく都ははようとりー、怒殺てるににみみ、" +
+    "のは夫娥、に息るだい部で、月彼純れうい返一ださっょた在。" +
+    "をした怨って民しの歩怨だ持だ詳化とめに襲省月るデムン"
 
 /**
  * Creates a fake mojibake effect.

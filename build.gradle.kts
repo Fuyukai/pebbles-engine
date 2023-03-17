@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.jetbrains.kotlin.jvm").version("1.8.0").apply(false)
+    id("org.jetbrains.kotlin.jvm").version("1.8.20-RC").apply(false)
     id("com.diffplug.spotless").version("6.16.0").apply(false)
 }
 
@@ -52,8 +52,6 @@ subprojects {
         withType<KotlinCompile> {
             kotlinOptions {
                 freeCompilerArgs = freeCompilerArgs + listOf(
-                    "-Xopt-in=kotlin.RequiresOptIn",  // Enable @OptIn
-                    "-Xstring-concat=indy-with-constants",  // Enable invokedynamic string concat
                     "-Xjvm-default=all",  // Forcibly enable Java 8+ default interface methods
                     "-Xassertions=always-enable",  // Forcibly enable assertions
                     "-Xlambdas=indy",  // Forcibly use invokedynamic for all lambdas.

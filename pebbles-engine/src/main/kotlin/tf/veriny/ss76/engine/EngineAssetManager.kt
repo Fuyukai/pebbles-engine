@@ -132,7 +132,9 @@ public class EngineAssetManager {
     @OptIn(ExperimentalPathApi::class)
     public fun autoload() {
         val assetsDir = javaClass.classLoader.getResource("data")?.toURI()
-                        ?: throw AssetLoadException("data", "Can't find any data directory!")
+        if (assetsDir == null) {
+            return println("warning: no assets found!")
+        }
 
         if (assetsDir.scheme == "file") {
             val path = assetsDir.toPath()

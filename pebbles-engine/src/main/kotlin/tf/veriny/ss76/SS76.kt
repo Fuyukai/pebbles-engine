@@ -11,7 +11,6 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
 import ktx.app.KtxApplicationAdapter
 import org.lwjgl.glfw.GLFW
-import tf.veriny.ss76.engine.*
 import tf.veriny.ss76.engine.screen.ErrorScreen
 import tf.veriny.ss76.engine.util.EktFiles
 import kotlin.time.ExperimentalTime
@@ -57,7 +56,7 @@ public class SS76(
                 }
 
                 setResizable(false)
-                setWindowIcon("gfx/icon-128x128.png")
+                setWindowIcon(settings.iconName)
                 useVsync(true)
                 setIdleFPS(60)
                 setForegroundFPS(60)
