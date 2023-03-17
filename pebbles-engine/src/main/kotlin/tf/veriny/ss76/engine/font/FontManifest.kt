@@ -23,12 +23,9 @@ public data class FontManifest(
         public val size: Int,
         /** The default colour of the font. */
         public val defaultColour: String = "white",
-        /** The list of colours to generate. */
-        @JsonDeserialize(contentAs = String::class)
-        public val colours: List<String> = NAMED_COLOURS.keys.toList()
     ) {
         init {
-            check(defaultColour in colours) { "$defaultColour is not going to be generated" }
+            check(defaultColour in NAMED_COLOURS) { "$defaultColour is not going to be generated" }
         }
     }
 }
