@@ -66,6 +66,8 @@ public class NVLRendererV3(
     private val realRngRaw = MiniMover64RNG()
     private val realRng = RandomWrapper(realRngRaw)
 
+    private var rainbowThisFrame = Color.WHITE.cpy()
+
     private var currentXOffset: Float = 0f
     private var currentYOffset: Float = 0f
 
@@ -241,6 +243,10 @@ public class NVLRendererV3(
             text = text.mojibakify(timedRng)
         }
 
+        if (TextualNode.Effect.RAINBOWIFY in node.effects) {
+            colour = rainbowThisFrame
+        }
+
         val x = BORDER_PADDING + INNER_PADDING + currentXOffset
         // negatives as y is up, but the y offset goes down.
         val y = viewport.worldHeight - BORDER_PADDING - INNER_PADDING - currentYOffset
@@ -371,8 +377,11 @@ public class NVLRendererV3(
 
     public fun render() {
         val es = state.engineState
+
         timedRngRaw.seed(es.globalTimer.floorDiv(30).toInt())
         buttons.reset()
+
+        rainbowThisFrame.set(timedRng.nextFloat(), timedRng.nextFloat(), timedRng.nextFloat(), 1.0f)
 
         val definition = state.definition
 
@@ -399,7 +408,6 @@ public class NVLRendererV3(
                 val blue = 0.25f * sin(timer / 100f) + 0.75f
                 val green = 1 - (0.25f * sin(timer / 100f) + 0.75f)
                 val red = 1 - (0.25f * cos(timer / 100f) + 0.75f)
-
                 clearScreen(red, green, blue, 0f)
             }
         }

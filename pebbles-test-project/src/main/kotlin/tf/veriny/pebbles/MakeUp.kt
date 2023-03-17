@@ -6,6 +6,7 @@ import tf.veriny.ss76.SS76Settings
 import tf.veriny.ss76.isInsideJar
 
 public object MakeUp {
+
     @JvmStatic
     public fun main(args: Array<String>) {
         val settings = SS76Settings(
@@ -17,6 +18,6 @@ public object MakeUp {
     }
 
     public fun setupEngine(state: EngineState) {
-
+        state.sceneManager.registerDemoScenes()
     }
 }

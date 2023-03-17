@@ -6,6 +6,7 @@
 
 package tf.veriny.ss76.engine.scene
 
+import com.badlogic.gdx.graphics.Color
 import tf.veriny.ss76.engine.scene.TextualNode.Effect
 import tf.veriny.ss76.engine.util.NAMED_COLOURS
 
@@ -428,8 +429,14 @@ public fun tokenifyScene(
                     }
                     textualNode.colourLinkedToButton = true
                 } else {
-                    textualNode.colour = NAMED_COLOURS[token.colour]
-                                         ?: throw TokenizationException("No such colour: ${token.colour}")
+                    val realColour = if (token.colour.startsWith("#")) {
+                        Color.valueOf(token.colour)
+                    } else {
+                        NAMED_COLOURS[token.colour]
+                            ?: throw TokenizationException("No such colour: ${token.colour}")
+                    }
+
+                    textualNode.colour = realColour
                 }
             }
 

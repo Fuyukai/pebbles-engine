@@ -61,6 +61,9 @@ public data class TextualNode(
         /** Mojibakes the text */
         MOJIBAKE,
 
+        /** Causes the text to undergo a rainbow effect. */
+        RAINBOWIFY,
+
         // unimplemented
         /** since wave effect */
         SINE,
