@@ -35,10 +35,12 @@ import tf.veriny.ss76.engine.UpdatableSceneWrapper
 public class Inventory(private val sceneManager: SceneManager) {
     public companion object {
         private val QUOTES = mutableListOf(
-            "...",
+            "\"You know, normal people say 'pocket'.\" - Char",
+            "\"Don't call your pockets your inventory around me. It's embarrassing.\" - Char",
+            "\"You're not a video game protagonist.\" - Char",
+            "\"People are going to think it's weird if you refer to your pockets as your 'inventory'.\" - Char",
         )
     }
-
     /** A single item in the inventory. */
     public data class InventoryItem(
         public val name: String,
@@ -73,7 +75,7 @@ public class Inventory(private val sceneManager: SceneManager) {
         scene.edit(0) {
             line("...")
 
-            /*line(QUOTES.random())
+            line(QUOTES.random())
             newline()
 
             line("Inventory listing:")
@@ -91,7 +93,7 @@ public class Inventory(private val sceneManager: SceneManager) {
                 scene.addButton(PushSceneButton("push-scene-${item.useScene}", item.useScene))
             }
             newline()
-            backButton()*/
+            backButton()
         }
 
         scene.register(sceneManager)

@@ -3,7 +3,7 @@ plugins {
     id("maven-publish")
 }
 
-version = "0.7.2"
+version = "0.7.3"
 
 dependencies {
     api("com.badlogicgames.gdx:gdx:1.10.0")
