@@ -32,7 +32,7 @@ public class ErrorScreen(
 
     private val batch = SpriteBatch()
     private val emergencyFont: BitmapFont? = run {
-        val path = EktFiles.RESOLVER.getPath("fonts/Mx437_Wang_Pro_Mono.ttf")
+        val path = EktFiles.RESOLVER.getPath("engine/fonts/Mx437_Wang_Pro_Mono.ttf")
                    ?: return@run null
 
         val generator = FreeTypeFontGenerator(
