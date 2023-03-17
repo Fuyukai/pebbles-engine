@@ -3,7 +3,7 @@ plugins {
     id("maven-publish")
 }
 
-version = "0.7.1"
+version = "0.7.2"
 
 dependencies {
     api("com.badlogicgames.gdx:gdx:1.10.0")
@@ -35,7 +35,7 @@ publishing {
 
             licenses {
                 license {
-                    name.set("GPL-3.0-or-later")
+                    name.set("MPL-2.0")
                     url.set("https://www.gnu.org/licenses/gpl-3.0.en.html")
                 }
             }

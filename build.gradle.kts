@@ -1,6 +1,6 @@
 plugins {
-    id("org.jetbrains.kotlin.jvm").version("1.6.0-RC2").apply(false)
-    id("com.diffplug.spotless").version("6.0.0").apply(false)
+    id("org.jetbrains.kotlin.jvm").version("1.8.20-RC").apply(false)
+    id("com.diffplug.spotless").version("6.17.0").apply(false)
 }
 
 allprojects {
@@ -48,7 +48,7 @@ subprojects {
                     "-Xassertions=always-enable",  // Forcibly enable assertions
                     "-Xlambdas=indy",  // Forcibly use invokedynamic for all lambdas.
                 )
-                jvmTarget = "16"
+                jvmTarget = "19"
             }
         }
     }
