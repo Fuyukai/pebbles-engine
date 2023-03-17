@@ -211,16 +211,18 @@ public class SceneDefinitionBuilder(
 
             val pushMatch = PUSH_REGEX.matchEntire(buttonName)
             if (pushMatch != null) {
-                val sceneId = pushMatch.groups[0]!!.value
+                val sceneId = pushMatch.groups[1]!!.value
                 val button = PushSceneButton(buttonName, sceneId)
                 buttons[buttonName] = button
+                continue
             }
 
             val csMatch = CHANGE_REGEX.matchEntire(buttonName)
             if (csMatch != null) {
-                val sceneId = csMatch.groups[0]!!.value
+                val sceneId = csMatch.groups[1]!!.value
                 val button = ChangeSceneButton(buttonName, sceneId)
                 buttons[buttonName] = button
+                continue
             }
 
             throw IllegalArgumentException("Missing definition for button $buttonName")
