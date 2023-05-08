@@ -7,7 +7,7 @@ version = "0.8.0"
 
 // can't be private due to insane inscrutible gradle bugs
 @Suppress("PropertyName")
-val KTX_VERSION = "1.11.0-rc3"
+val KTX_VERSION = "1.11.0-rc5"
 @Suppress("PropertyName")
 val GDX_VERSION = "1.11.0"
 
@@ -30,10 +30,10 @@ dependencies {
     api("dev.dirs:directories:26")
     api("com.squareup.okio:okio:3.3.0")
 
-    api("com.fasterxml.jackson.core:jackson-core:2.14.0")
-    api("com.fasterxml.jackson.core:jackson-databind:2.14.0")
-    api("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.0")
-    api("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.0")
+    api("com.fasterxml.jackson.core:jackson-core:2.15.0")
+    api("com.fasterxml.jackson.core:jackson-databind:2.15.0")
+    api("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.0")
+    api("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.0")
 
 }
 

@@ -5,8 +5,9 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.jetbrains.kotlin.jvm").version("1.8.20-RC").apply(false)
-    id("com.diffplug.spotless").version("6.16.0").apply(false)
+    id("org.jetbrains.kotlin.jvm").version("1.8.21").apply(false)
+    id("com.diffplug.spotless").version("6.18.0").apply(false)
+    id("com.github.ben-manes.versions").version("0.46.0")
 }
 
 allprojects {
@@ -21,6 +22,7 @@ subprojects {
 
     apply(plugin = "kotlin")
     apply(plugin = "com.diffplug.spotless")
+    apply(plugin = "com.github.ben-manes.versions")
 
     val implementation by configurations
     dependencies {
