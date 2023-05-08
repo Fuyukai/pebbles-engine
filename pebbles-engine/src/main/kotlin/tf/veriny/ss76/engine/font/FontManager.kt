@@ -62,8 +62,17 @@ public class FontManager(private val state: EngineState) {
             color = Color.WHITE
         }
 
+        val labelFont = if (entry.generateLabelStyle) {
+            generator.generateFont {
+                size = entry.size
+                mono = true
+                characters = CHARACTERS
+                color = Color.WHITE
+            }
+        } else null
+
         generator.dispose()
-        return Font(name, font, default)
+        return Font(name, font, labelFont, default)
     }
 
     /**

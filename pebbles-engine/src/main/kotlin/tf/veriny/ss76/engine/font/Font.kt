@@ -10,13 +10,15 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
 
 /**
  * A single generated monospace font.
  */
 public class Font(
     public val name: String,
-    private val bitmap: BitmapFont,
+    private val normalBitmap: BitmapFont,
+    private val labelBitmap: BitmapFont?,
     public val defaultColour: Color
 ) {
 
@@ -26,24 +28,34 @@ public class Font(
     /** The height of individual characters. Only makes sense for monospace fonts. */
     public val characterHeight: Float
 
-    private val layout = GlyphLayout(bitmap, " ")
+    private val layout = GlyphLayout(normalBitmap, " ")
 
     init {
         characterWidth = layout.width
         characterHeight = layout.height
-        bitmap.color = defaultColour
+        normalBitmap.color = defaultColour
     }
 
     /** Gets the width of the specified text. */
     public fun widthOf(text: String): Float {
-        layout.setText(bitmap, text)
+        layout.setText(normalBitmap, text)
         return layout.width
     }
 
     /** Gets the height of the speciified text. */
     public fun heightOf(text: String): Float {
-        layout.setText(bitmap, text)
+        layout.setText(normalBitmap, text)
         return layout.height
+    }
+
+
+    // need to separate out the fonts because scene2d fucks with the font properties sometimes.
+    /**
+     * Creates a new label style from this font, if it was generated with a label font.
+     */
+    public fun makeLabelStyle(): LabelStyle {
+        check(labelBitmap != null) { "Font was not generated with a label style" }
+        return LabelStyle(labelBitmap, defaultColour)
     }
 
     /**
@@ -56,10 +68,10 @@ public class Font(
         x: Float,
         y: Float
     ) {
-        bitmap.color = color
-        layout.setText(bitmap, text)
-        bitmap.draw(batch, text, x, y)
-        bitmap.color = defaultColour
+        normalBitmap.color = color
+        layout.setText(normalBitmap, text)
+        normalBitmap.draw(batch, text, x, y)
+        normalBitmap.color = defaultColour
     }
 
     /**
@@ -72,8 +84,8 @@ public class Font(
         y: Float
     ) {
         // we can avoid any calls to setColor here as drawWithColour automatically sets it back
-        layout.setText(bitmap, text)
-        bitmap.draw(batch, text, x, y)
+        layout.setText(normalBitmap, text)
+        normalBitmap.draw(batch, text, x, y)
     }
 
 }

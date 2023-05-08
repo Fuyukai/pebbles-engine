@@ -23,6 +23,8 @@ public data class FontManifest(
         public val size: Int,
         /** The default colour of the font. */
         public val defaultColour: String = "white",
+        /** If true, a second font instance will be generated for usage with Scene2D. */
+        public val generateLabelStyle: Boolean = false,
     ) {
         init {
             check(defaultColour in NAMED_COLOURS) { "$defaultColour is not going to be generated" }
