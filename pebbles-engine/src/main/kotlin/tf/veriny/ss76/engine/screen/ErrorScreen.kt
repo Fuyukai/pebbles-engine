@@ -19,7 +19,6 @@ import tf.veriny.ss76.EngineState
 import tf.veriny.ss76.engine.util.EktFiles
 import tf.veriny.ss76.engine.util.NioFileHandle
 import tf.veriny.ss76.use
-import kotlin.io.path.toPath
 
 /**
  * The screen for rendering errors.
