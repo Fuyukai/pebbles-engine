@@ -7,10 +7,9 @@
 package tf.veriny.ss76.engine.nvl
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.GL30
-import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.graphics.*
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
@@ -19,6 +18,7 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.app.clearScreen
 import ktx.assets.disposeSafely
 import ktx.graphics.use
+import space.earlygrey.shapedrawer.ShapeDrawer
 import squidpony.squidmath.MiniMover64RNG
 import tf.veriny.ss76.engine.SS76EngineInternalError
 import tf.veriny.ss76.engine.VnButtonManager
@@ -35,6 +35,7 @@ import kotlin.math.ceil
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
+
 
 /**
  * The renderer for NVL-based scenes.
@@ -62,7 +63,8 @@ public class NVLRendererV3(
     }
 
     private val batch = SpriteBatch()
-    private val shapeRenderer = ShapeRenderer()
+    private val shapeDrawerTex: Texture
+    private val shapeDrawer: ShapeDrawer
 
     // allegedly the fastest rng in the lib.
     private val timedRngRaw = MiniMover64RNG()
@@ -82,22 +84,43 @@ public class NVLRendererV3(
         state.engineState.assets.getBackground(it)
     }
 
+    private val topTextFont = state.engineState.fontManager.getFont("top-text")
+
     init {
         batch.projectionMatrix = camera.combined
-        shapeRenderer.projectionMatrix = camera.combined
+
+        val pixmap = Pixmap(1, 1, Pixmap.Format.RGBA8888)
+        pixmap.setColor(Color.WHITE)
+        pixmap.drawPixel(0, 0)
+        shapeDrawerTex = Texture(pixmap)
+        pixmap.disposeSafely()
+
+        shapeDrawer = ShapeDrawer(batch, TextureRegion(shapeDrawerTex, 0, 0, 1, 1))
 
         realRngRaw.seed(SecureRandom.getInstanceStrong().nextInt())
     }
 
     override fun dispose() {
         batch.disposeSafely()
-        shapeRenderer.disposeSafely()
+        shapeDrawerTex.disposeSafely()
     }
 
     // == Extensions == //
     private inline val TextualNode.font: Font
         get() {
-            return state.engineState.fontManager.getFont(fontName)
+            return getFont(state.engineState.fontManager)
+        }
+
+    private inline val TextualNode.width: Float
+        get() {
+            if (cachedWidth > 0) return cachedWidth
+            return font.widthOf(text).also { cachedWidth = it }
+        }
+
+    private inline val TextualNode.height: Float
+        get() {
+            if (cachedHeight > 0) return cachedHeight
+            return font.heightOf(text).also { cachedHeight = it }
         }
 
     private var lastPageIdx = -1
@@ -307,8 +330,8 @@ public class NVLRendererV3(
     private fun advanceByNode(node: TextualNode) {
         // don't take partial drawing into account as it'll look really weird.
         val font = node.font
-        val width = font.widthOf(node.text)
-        val height = font.heightOf(node.text)
+        val width = node.width
+        val height = node.height
 
         if (node.causesNewline) {
             currentYOffset += height
@@ -451,26 +474,23 @@ public class NVLRendererV3(
             }
         }
 
-        // Render the text box, if needed. Skipped for text-only mode, where it wouldn't be visible.
-        if (!definition.modifiers.textOnlyMode) {
-            Gdx.gl.glEnable(GL30.GL_BLEND)
-            Gdx.gl.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA)
-            shapeRenderer.use(ShapeRenderer.ShapeType.Filled, camera) {
-                it.rect(
+        Gdx.gl.glEnable(GL30.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA)
+        batch.use(camera) {
+            // Render the text box, if needed. Skipped for text-only mode, where it wouldn't be visible.
+
+            if (!definition.modifiers.textOnlyMode) {
+                shapeDrawer.filledRectangle(
                     /* x = */ BORDER_PADDING, /* y = */ BORDER_PADDING,
                     /* width = */ viewport.worldWidth - (75f * 2),
                     /* height = */ viewport.worldHeight - (75f * 2),
-                    /* col1 = */ BOX_COLOUR,
-                    /* col2 = */ BOX_COLOUR,
-                    /* col3 = */ BOX_COLOUR,
-                    /* col4 = */ BOX_COLOUR
+                    /* color1 = */ BOX_COLOUR,
+                    /* color2 = */ BOX_COLOUR,
+                    /* color3 = */ BOX_COLOUR,
+                    /* color4 = */ BOX_COLOUR
                 )
             }
 
-            Gdx.gl.glDisable(GL30.GL_BLEND)
-        }
-
-        batch.use(camera) {
             // draw page buttons
             if (definition.pageCount > 1 && definition.modifiers.drawPageButtons) {
                 for (node in getPageButtons()) {
@@ -489,12 +509,11 @@ public class NVLRendererV3(
                 drawClickables()
 
                 val topText = definition.modifiers.topText ?: state.engineState.settings.defaultTopText
-                val font = state.engineState.fontManager.getFont("top-text")
-                val topTextWidth = font.widthOf(topText)
+                val topTextWidth = topTextFont.widthOf(topText)
 
                 val yOffset = viewport.worldHeight - 10f
 
-                font.draw(
+                topTextFont.draw(
                     batch,
                     topText,
                     (viewport.worldWidth / 2) - (topTextWidth / 2),
@@ -511,5 +530,7 @@ public class NVLRendererV3(
                 )
             }
         }
+
+        Gdx.gl.glDisable(GL30.GL_BLEND)
     }
 }

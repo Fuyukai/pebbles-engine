@@ -7,6 +7,8 @@
 package tf.veriny.ss76.engine.scene
 
 import com.badlogic.gdx.graphics.Color
+import tf.veriny.ss76.engine.font.Font
+import tf.veriny.ss76.engine.font.FontManager
 
 /**
  * A single word in a virtual novel.
@@ -70,5 +72,14 @@ public data class TextualNode(
 
         /** trollface */
         AYANA,
+    }
+
+    private var cachedFont: Font? = null
+    internal var cachedWidth: Float = -1.0f
+    internal var cachedHeight: Float = -1.0f
+
+    public fun getFont(manager: FontManager): Font {
+        if (cachedFont != null) return cachedFont!!
+        return manager.getFont(this.fontName).also { cachedFont = it }
     }
 }

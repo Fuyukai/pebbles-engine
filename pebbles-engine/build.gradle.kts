@@ -18,6 +18,7 @@ val KTX_VERSION = "1.11.0-rc5"
 @Suppress("PropertyName")
 val GDX_VERSION = "1.11.0"
 
+
 dependencies {
     api("com.badlogicgames.gdx:gdx:$GDX_VERSION")
     api("com.badlogicgames.gdx:gdx-freetype:$GDX_VERSION")
@@ -27,6 +28,7 @@ dependencies {
     api("io.github.libktx:ktx-math:$KTX_VERSION")
     api("io.github.libktx:ktx-assets:$KTX_VERSION")
     api("io.github.libktx:ktx-graphics:$KTX_VERSION")
+    api("space.earlygrey:shapedrawer:2.6.0")
 
     api("com.squidpony:squidlib-util:3.0.6")
 

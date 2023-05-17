@@ -14,6 +14,8 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
+        // TODO: rehost shape drawer on our maven for now...
+        maven(url = "https://jitpack.io")
     }
 }
 

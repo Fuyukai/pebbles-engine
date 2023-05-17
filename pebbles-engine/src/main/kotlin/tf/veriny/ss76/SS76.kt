@@ -9,6 +9,9 @@ package tf.veriny.ss76
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
+import com.badlogic.gdx.graphics.FPSLogger
+import com.badlogic.gdx.utils.PerformanceCounter
+import com.badlogic.gdx.utils.PerformanceCounters
 import ktx.app.KtxApplicationAdapter
 import org.lwjgl.glfw.GLFW
 import tf.veriny.ss76.engine.PreferencesManager
@@ -99,6 +102,8 @@ public class SS76(
 
         Gdx.input.inputProcessor = state.input
     }
+
+    private val fps = FPSLogger()
 
     private fun debugRender() {
         val time = measureTime { state.render() }.inWholeNanoseconds
