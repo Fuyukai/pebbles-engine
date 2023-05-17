@@ -112,6 +112,13 @@ public class SceneManager(internal val state: EngineState) : Saveable {
         state.definition.onLoad(state)
     }
 
+    internal fun prebakeScenes() {
+        for (scene in sceneMapping.values) {
+            if (!scene.isStatic) continue
+            scene.bake(state, isPreBaking = true, force = false)
+        }
+    }
+
     private fun loadAndActivateScene(id: String, force: Boolean = false): SceneState {
         val unbaked = sceneMapping[id] ?: error("No such registered scene: $id")
         val definition = unbaked.bake(

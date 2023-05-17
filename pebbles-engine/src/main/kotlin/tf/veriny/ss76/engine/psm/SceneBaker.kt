@@ -314,6 +314,6 @@ public class SceneBaker {
             }
         }
 
-        return this.currentNodes
+        return this.currentNodes.toList()
     }
 }

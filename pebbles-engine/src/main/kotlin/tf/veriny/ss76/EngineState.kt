@@ -159,6 +159,7 @@ public class EngineState(
             checkpoints.rebuild()
 
             EktFiles.RESOLVER.closeAllFilesystems()
+            sceneManager.prebakeScenes()
         }
 
         println("Initialised SS76 engine with ${sceneManager.registeredScenes} scenes in $fullTime.")

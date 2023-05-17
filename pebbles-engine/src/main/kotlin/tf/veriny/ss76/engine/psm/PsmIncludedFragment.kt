@@ -18,7 +18,7 @@ public class PsmIncludedFragment(
     }
 
     public fun isStatic(): Boolean {
-        return condition != null
+        return condition == null
     }
 
     public fun shouldBeIncluded(state: EngineState): Boolean {

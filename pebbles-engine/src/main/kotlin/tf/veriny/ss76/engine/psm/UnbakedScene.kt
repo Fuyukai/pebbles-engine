@@ -28,6 +28,11 @@ public class UnbakedScene(
 ) {
     private var cachedScene: VirtualNovelSceneDefinition? = null
 
+    /**
+     * If true, then this scene is static (it has no conditions).
+     */
+    public val isStatic: Boolean = pages.all { it.all { inner -> inner.isStatic() } }
+
     private fun bakePage(
         page: List<PsmIncludedFragment>,
         state: EngineState,
@@ -57,7 +62,6 @@ public class UnbakedScene(
         isPreBaking: Boolean = false,
         force: Boolean = false
     ): VirtualNovelSceneDefinition {
-        val isStatic = pages.all { it.all { inner -> inner.isStatic() } }
         if (!force && isStatic && cachedScene != null) {
             return cachedScene!!
         }
@@ -69,7 +73,7 @@ public class UnbakedScene(
         val us = bakeTime.duration.inWholeMicroseconds
         println("SCENE BAKERY: Took ${us/1000}ms!")
         if (!isPreBaking && us > 1_000_000/60) {
-            println("Warning: Scene baking took too long! Consider asking for it to be pre-baked!")
+            println("Warning: Scene baking took too long!")
         }
 
 
