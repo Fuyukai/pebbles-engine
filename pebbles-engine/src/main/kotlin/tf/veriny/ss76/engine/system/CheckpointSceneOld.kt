@@ -8,46 +8,31 @@ package tf.veriny.ss76.engine.system
 
 import tf.veriny.ss76.EngineState
 import tf.veriny.ss76.engine.Button
-import tf.veriny.ss76.engine.scene.UpdatableSceneWrapper
+/*import tf.veriny.ss76.engine.scene.UpdatableSceneWrapper*/
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 /**
  * Responsible for saving checkpoints.
  */
-public class CheckpointScene(
+public class CheckpointSceneOldUnused(
     private val state: EngineState,
 ) {
     public companion object {
         /** The name of the checkpoint save manager scene. */
         public const val CHECKPOINT_SCENE_NAME: String = "engine.save-menu"
 
-        private val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm:ss")
     }
 
     /** The menu for checkpoints. */
-    private val checkpointScene = UpdatableSceneWrapper(CHECKPOINT_SCENE_NAME)
-
-    private inner class CheckpointButton(val idx: Int, val load: Boolean) : Button {
-        override val name: String = if (load) "load-$idx" else "save-$idx"
-
-        override fun run(state: EngineState) {
-            if (load) {
-                state.saveManager.load(idx)
-            } else {
-                state.saveManager.save(idx)
-            }
-
-            updateCheckpointScene()
-        }
-    }
+    // private val checkpointScene = UpdatableSceneWrapper(CHECKPOINT_SCENE_NAME)
 
     public fun register() {
         updateCheckpointScene()
     }
 
     private fun updateCheckpointScene() {
-        checkpointScene.reset()
+        /*checkpointScene.reset()
         checkpointScene.edit(0) {
             line("@slate@Checkpoint @slate@Menu")
             newline()
@@ -79,6 +64,6 @@ public class CheckpointScene(
             backButton()
         }
 
-        checkpointScene.register(state.sceneManager)
+        checkpointScene.register(state.sceneManager)*/
     }
 }

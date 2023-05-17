@@ -1,9 +1,3 @@
-/*
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/.
- */
-
 package tf.veriny.ss76.engine.scene
 
 import okio.BufferedSink
@@ -12,253 +6,189 @@ import tf.veriny.ss76.EngineState
 import tf.veriny.ss76.engine.SS76EngineInternalError
 import tf.veriny.ss76.engine.Saveable
 import tf.veriny.ss76.engine.nvl.NVLScreen
+import tf.veriny.ss76.engine.psm.SceneBaker
+import tf.veriny.ss76.engine.psm.UnbakedScene
 import tf.veriny.ss76.engine.readPascalString
 import tf.veriny.ss76.engine.writePascalString
 
-// TODO: Clean this up a bit
-
 /**
- * Responsible for handling loaded scenes.
+ * Responsible for loading and baking scenes.
  */
-public class SceneManager(
-    private val state: EngineState,
-) : Saveable {
-    private val seenScenes /*on the sea shore*/ = mutableSetOf<String>()
-    private val completedScenes = mutableSetOf<String>()
-    public val registeredScenes: MutableMap<String, SceneDefinition> = mutableMapOf()
+public class SceneManager(internal val state: EngineState) : Saveable {
+    /**
+     * The scene bakery that turns raw unbaked scene text into baked scenes.
+     */
+    public val sceneBakery: SceneBaker = SceneBaker()
 
+    /** The mapping of scene ID to unbaked scene. */
+    private val sceneMapping = mutableMapOf<String, UnbakedScene>()
+
+    /** The stack of scenes currently running. */
+    private val sceneStack = ArrayDeque<SceneState>()
+
+    /** The set of scenes that have already been viewed. */
+    private val seenScenes = mutableSetOf<String>()
+
+    /** Used for dealing with links. */
     public val linkHelper: NodeLinkHelper = NodeLinkHelper(state)
 
-    public val registeredSceneCount: Int get() = registeredScenes.size
-
-    // stack of renderers, *not* definitions.
-    private val stack = ArrayDeque<SceneState>()
-
-    /** The number of scenes on the current scene stack. */
-    public val stackSize: Int get() = stack.size
-
-    // current *renderer*, not definitions.
-    public val currentScene: SceneState get() = stack.last()
-
-    private var previousScene: VirtualNovelSceneDefinition? = null
+    /** The previous scene. Used for tracking seen scenes. */
+    private var previousScene: SceneState? = null
         private set(value) {
-            value?.let { completedScenes.add(it.sceneId) }
+            value?.let { seenScenes.add(it.definition.sceneId) }
             field = value
         }
 
-    /** Registers a single scene. */
-    public fun registerScene(scene: SceneDefinition) {
-        registeredScenes[scene.sceneId] = scene
+    /** The number of scenes currently on the scene stack. */
+    public val stackSize: Int get() = sceneStack.size
+
+    /** The number of registered scenes. */
+    public val registeredScenes: Int get() = sceneMapping.size
+
+    /** The current scene running. */
+    public val currentScene: SceneState get() = sceneStack.last()
+
+    /**
+     * Checks if the current scene has the specified scene ID.
+     */
+    public fun currentSceneIs(sceneId: String): Boolean {
+        return sceneStack.lastOrNull()?.definition?.sceneId == sceneId
     }
 
     /**
-     * Re-registers a scene. This will update any references in the current stack of scenes.
+     * Checks if we have seen the specified scene before.
      */
-    public fun reregisterScene(scene: SceneDefinition) {
-        val old = registeredScenes[scene.sceneId]
-        registeredScenes[scene.sceneId] = scene
+    public fun hasSeenScene(sceneId: String): Boolean {
+        return seenScenes.contains(sceneId)
+    }
 
-        if (old == null) return
-        if (stack.isEmpty()) return
-
-        when {
-            // TOS requires unloading the old scene and replacing it with the new one
-            currentScene.definition == old -> {
-                stack.removeLast()
-                val state = SceneState(this.state, scene)
-                stack.add(state)
-                activateScene(state)
-            }
-            // just swap the references to the old scenes with the new one
-            previousScene == old -> {
-                previousScene = scene
-            }
-
-            else -> {
-                for (idx in 0 until stackSize) {
-                    if (stack[idx].definition == old) {
-                        stack[idx] = SceneState(this.state, definition = scene)
-                    }
-                }
-            }
+    /**
+     * Registers a new unbaked scene with this scene manager.
+     */
+    public fun registerScene(unbakedScene: UnbakedScene, suppressWarning: Boolean = false) {
+        if (sceneMapping.put(unbakedScene.sceneId, unbakedScene) != null) {
+            if (!suppressWarning) println("SCENES: scene ${unbakedScene.sceneId} already existed, overwriting")
         }
     }
 
     /**
-     * Checks if this scene has been completed before. Scenes are marked as completed when exited
-     * from; this persists across checkpoints.
+     * Activates a new scene. This does not manipulate the stack.
      */
-    public fun hasCompletedScene(scene: String): Boolean {
-        return scene in completedScenes
-    }
+    private fun activateScene(state: SceneState) {
+        println("activating ${state.definition.sceneId}")
+        seenScenes.add(state.definition.sceneId)
 
-    /** Checks if this scene is registered. */
-    public fun doesSceneExist(scene: String): Boolean = registeredScenes[scene] != null
-
-    /** Checks if this scene has been visited before. */
-    public fun hasVisitedScene(scene: String): Boolean = scene in seenScenes
-
-    /** Checks if this scene has been visited before. */
-    public fun hasVisitedScene(scene: VirtualNovelSceneDefinition): Boolean =
-        hasVisitedScene(scene.sceneId)
-
-    /** Checks if the current scene has the specified ID. */
-    public fun currentSceneIs(id: String): Boolean = currentScene.definition.sceneId == id
-
-    // == Scene stack == //
-
-    /**
-     * Activates a scene, swapping out the current scene data and screen.
-     */
-    private fun activateScene(scene: SceneState) {
-        println("activating ${scene.definition.sceneId}")
-        seenScenes.add(scene.definition.sceneId)
-
-        if (scene.definition.modifiers.nonRenderable) {
+        if (state.definition.modifiers.nonRenderable) {
             // skip creating a screen
-            scene.definition.onLoad(scene)
-            if (stack.last() == scene) {
+            state.definition.onLoad(state)
+            if (sceneStack.last() == state) {
                 throw SS76EngineInternalError(
-                    "Scene '${scene.definition.sceneId} is marked as non-renderable, " +
-                    "but failed to switch scene on load"
+                    "Scene '${state.definition.sceneId} is marked as non-renderable, " +
+                        "but failed to switch scene on load"
                 )
             }
             return
         }
 
         val forceNvl = System.getProperty("disable-adv-renderers", "false").toBooleanStrict()
-        val advMode = scene.definition.createAdvRenderer()
+        val advMode = state.definition.createAdvRenderer()
         if (!forceNvl && advMode != null) {
-            val screen = state.screenManager.currentScreen
+            val screen = this.state.screenManager.currentScreen
             TODO("reimplement ADV mode")
             /*if (screen !is ADVScreen || !screen.isAlreadyRendering(advMode)) {
                 state.screenManager.changeScreen(ADVScreen(state, advMode))
             }*/
         } else {
-            if (scene.definition.modifiers.causesFadeIn) {
-                println("fading in scene ${scene.definition.sceneId}")
+            if (state.definition.modifiers.causesFadeIn) {
+                println("fading in scene ${state.definition.sceneId}")
                 // 30 frames of fade-in
-                scene.timer = -30
-                state.screenManager.fadeIn(NVLScreen(state, scene))
+                state.timer = -30
+                this.state.screenManager.fadeIn(NVLScreen(this.state, state))
             } else {
-                state.screenManager.changeScreen(NVLScreen(state, scene))
+                this.state.screenManager.changeScreen(NVLScreen(this.state, state))
             }
         }
 
-        scene.definition.onLoad(scene)
+        state.definition.onLoad(state)
+    }
+
+    private fun loadAndActivateScene(id: String, force: Boolean = false): SceneState {
+        val unbaked = sceneMapping[id] ?: error("No such registered scene: $id")
+        val definition = unbaked.bake(
+            state, isPreBaking = false, force = force,
+        )
+        val sceneState = SceneState(state, definition)
+        activateScene(sceneState)
+        return sceneState
     }
 
     /**
-     * Pushes and activates a scene.
+     * Pushes a new scene onto the scene stack.
      */
-    public fun pushScene(scene: VirtualNovelSceneDefinition) {
-        if (stack.isNotEmpty()) {
-            val tos = stack.last()
-            previousScene = tos.definition
-        }
-
-        val state = SceneState(this.state, scene)
-        stack.add(state)
-        activateScene(state)
+    public fun pushScene(id: String) {
+        previousScene = sceneStack.lastOrNull()
+        val scene = loadAndActivateScene(id)
+        sceneStack.addLast(scene)
     }
 
     /**
-     * Pushes and activates a scene, using its string id.
+     * Swaps out the scene on the top of the stack with the specified scene.
      */
-    public fun pushScene(scene: String) {
-        val realScene = getRegisteredScene(scene)
-        pushScene(realScene)
+    public fun swapScene(id: String) {
+        previousScene = sceneStack.removeLastOrNull()
+        val scene = loadAndActivateScene(id)
+        sceneStack.addLast(scene)
     }
 
     /**
-     * Changes the top scene on the stack.
+     * Rebakes the top-most scene.
      */
-    public fun changeScene(scene: SceneDefinition) {
-        val tos = stack.removeLast()
-        previousScene = tos.definition
-
-        val state = SceneState(this.state, scene)
-        stack.add(state)
-        activateScene(state)
+    public fun rebake() {
+        val scene = sceneStack.removeLastOrNull() ?: error("no scene to rebake!")
+        val id = scene.definition.sceneId
+        val newScene = loadAndActivateScene(id, force = true)
+        newScene.timer = scene.timer
+        sceneStack.addLast(newScene)
     }
 
     /**
-     * Changes the top scene on the stack, using its ID.
-     */
-    public fun changeScene(scene: String) {
-        val definition = getRegisteredScene(scene)
-        changeScene(definition)
-    }
-
-    /**
-     * Exits from the top scene.
+     * Exits the top-most scene.
      */
     public fun exitScene() {
-        val tos = stack.removeLast()
-        previousScene = tos.definition
+        val tos = sceneStack.removeLast()
+        previousScene = tos
 
-        val newTos = stack.last()
+        val newTos = sceneStack.last()
         activateScene(newTos)
-    }
-
-    /**
-     * Gets a single scene.
-     */
-    public fun getRegisteredScene(scene: String): SceneDefinition {
-        return registeredScenes[scene] ?: error("missing scene definition: $scene")
-    }
-
-    // == Saving == //
-    override fun write(buffer: BufferedSink) {
-        // write seen scenes
-        val seenCount = seenScenes.size
-        buffer.writeInt(seenCount)
-        for (scene in seenScenes) {
-            buffer.writePascalString(scene)
-        }
-
-        val completedCount = completedScenes.size
-        buffer.writeInt(completedCount)
-        for (scene in completedScenes) {
-            buffer.writePascalString(scene)
-        }
-
-        // write the current scene stack
-        val scenes = stack.map { it.definition.sceneId }
-        buffer.writeInt(scenes.size)
-        for (scene in scenes) {
-            buffer.writePascalString(scene)
-        }
-    }
-
-    internal fun printSceneStack() {
-        for ((idx, scene) in this.stack.withIndex()) {
-            println("  #$idx: id '${scene.definition.sceneId}'")
-        }
     }
 
     override fun read(buffer: BufferedSource) {
         seenScenes.clear()
-        completedScenes.clear()
-        stack.clear()
-
-        val seenCount = buffer.readInt()
-        for (idx in 0 until seenCount) {
-            val sceneId = buffer.readPascalString()
-            seenScenes.add(sceneId)
-        }
-
-        val completedCount = buffer.readInt()
-        for (idx in 0 until completedCount) {
-            val sceneId = buffer.readPascalString()
-            seenScenes.add(sceneId)
-        }
+        sceneStack.clear()
 
         val sceneCount = buffer.readInt()
         for (idx in 0 until sceneCount) {
             pushScene(buffer.readPascalString())
         }
 
-        printSceneStack()
+        val seenCount = buffer.readInt()
+        for (idx in 0 until seenCount) {
+            val sceneId = buffer.readPascalString()
+            seenScenes.add(sceneId)
+        }
+    }
+
+    override fun write(buffer: BufferedSink) {
+        val scenes = sceneStack.map { it.definition.sceneId }
+        buffer.writeInt(scenes.size)
+        for (scene in scenes) {
+            buffer.writePascalString(scene)
+        }
+
+        val seenCount = seenScenes.size
+        buffer.writeInt(seenCount)
+        for (scene in seenScenes) {
+            buffer.writePascalString(scene)
+        }
     }
 }

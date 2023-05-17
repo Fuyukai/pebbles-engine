@@ -18,6 +18,6 @@ public class NodeLinkHelper(private val state: EngineState) {
 
         // TODO: extend the colour linking system
         val button = scene.buttons[node.buttonId] ?: return false
-        return button.linkedId?.let { state.sceneManager.hasCompletedScene(it) } ?: false
+        return button.linkedId?.let { state.sceneManager.hasSeenScene(it) } ?: false
     }
 }

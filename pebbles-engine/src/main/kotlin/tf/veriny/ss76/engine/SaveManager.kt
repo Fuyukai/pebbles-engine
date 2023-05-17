@@ -27,7 +27,7 @@ import kotlin.io.path.getLastModifiedTime
 public class SaveManager(
     private val state: EngineState
 ) {
-    private companion object {
+    internal companion object {
         val BASE_DIR: Path
         val MAGIC = "SS76".toByteArray().toByteString()
         const val SAVE_VERSION = 1

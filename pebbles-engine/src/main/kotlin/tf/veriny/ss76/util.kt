@@ -108,3 +108,7 @@ public fun String.mojibakify(rng: Random): String {
         .replace(" ", "")
 }
 
+public fun String.toBooleanHandleBlank(default: Boolean): Boolean {
+    return if (isBlank()) default
+    else toBooleanStrict()
+}

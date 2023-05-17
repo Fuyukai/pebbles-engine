@@ -1,0 +1,11 @@
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+
+[*.{kt,kts}]
+max_line_length = 100
+
+[*.{psm,psmf}]
+max_line_length = 70

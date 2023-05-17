@@ -1,0 +1,42 @@
+----- engine.generic.newline
+$[nl=]
+
+----- engine.checkpoint.header
+
+$[@=slate] Checkpoint Menu $[pop=] $[nl=2]
+
+A checkpoint saves the current state of the game, including the
+current scene stack. $[nl=2]
+
+This means you can save anywhere, no matter how deep into a scene or
+set of scenes you are.
+
+----- engine.checkpoint.load
+LOAD
+
+----- engine.checkpoint.save
+SAVE
+
+----- engine.checkpoint.empty
+#[@=green] empty
+
+----- engine.checkpoint.slot0
+Slot \#1 -
+
+----- engine.checkpoint.slot1
+Slot \#2 -
+
+----- engine.checkpoint.slot2
+Slot \#3 -
+
+----- engine.checkpoint.slot3
+Slot \#4 -
+
+----- engine.checkpoint.slot4
+Slot \#5 -
+
+
+----- engine.pebbles.info
+
+This game was built using the Pebbles Engine! $[nl=2]
+

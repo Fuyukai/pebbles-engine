@@ -39,7 +39,7 @@ public class ChangeSceneButton(
 
     override fun run(state: EngineState) {
         if (setFlag != null) state.eventFlagsManager.set(setFlag, eventValue)
-        state.sceneManager.changeScene(linkedId)
+        state.sceneManager.swapScene(linkedId)
     }
 }
 

@@ -25,6 +25,11 @@ public data class SS76Settings(
      */
     public val windowTitle: String = "Pebbles Engine",
 
+    /**
+     * The default language code to use for loading PSF files and other localised text.
+     */
+    public val defaultLanguageCode: String = "en",
+
     // == optional == //
     /**
      * The default text to draw at the top during NVL-renderer scenes.

@@ -11,6 +11,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
 import ktx.app.KtxApplicationAdapter
 import org.lwjgl.glfw.GLFW
+import tf.veriny.ss76.engine.PreferencesManager
 import tf.veriny.ss76.engine.screen.ErrorScreen
 import tf.veriny.ss76.engine.util.EktFiles
 import kotlin.time.ExperimentalTime
@@ -25,7 +26,7 @@ public class SS76(
 ) : KtxApplicationAdapter {
     public companion object {
         public val IS_DEMO: Boolean =
-            System.getProperty("demo", "false").toBooleanStrict()
+            System.getProperty("ss76.demo", "false").toBooleanStrict()
 
         public fun start(settings: SS76Settings) {
             GLFW.glfwInit()
@@ -35,7 +36,7 @@ public class SS76(
             val config = Lwjgl3ApplicationConfiguration().apply {
                 setTitle(settings.windowTitle)
 
-                val forceScreenSize = System.getProperty("mag.force-screen-size")
+                val forceScreenSize = System.getProperty("ss76.force-screen-size")
                 if (forceScreenSize != null) {
                     val (width, height) = forceScreenSize.split('x').map { it.toInt() }
                     setWindowedMode(width, height)
@@ -83,7 +84,17 @@ public class SS76(
     }
 
     private fun createImpl() {
-        state = EngineState(settings)
+        // extremely early init, find and load language code
+        val prefs = PreferencesManager(settings)
+        prefs.loadPreferences()
+
+        val potentialPropLang = System.getProperty("ss76.lang")
+        if (potentialPropLang != null) {
+            prefs["language"] = potentialPropLang
+            prefs.save()
+        }
+
+        state = EngineState(settings, prefs)
         state.created()
 
         Gdx.input.inputProcessor = state.input

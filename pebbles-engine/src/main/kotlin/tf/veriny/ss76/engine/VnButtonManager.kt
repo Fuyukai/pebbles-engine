@@ -14,7 +14,7 @@ import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.Pool
 import ktx.app.KtxInputAdapter
 import tf.veriny.ss76.EngineState
-import tf.veriny.ss76.engine.system.CheckpointScene
+import tf.veriny.ss76.engine.system.CheckpointSceneManager
 
 /**
  * Manages the clickable buttons on a scene.
@@ -36,7 +36,7 @@ public class VnButtonManager(
 
         public val CHECKPOINT_BUTTON: Button = object : Button {
             override val name: String = "checkpoint-button-global"
-            override val linkedId: String = CheckpointScene.CHECKPOINT_SCENE_NAME
+            override val linkedId: String = CheckpointSceneManager.CHECKPOINT_SCENE_NAME
 
             override fun run(state: EngineState) {
                 if (state.sceneManager.currentSceneIs(linkedId)) {

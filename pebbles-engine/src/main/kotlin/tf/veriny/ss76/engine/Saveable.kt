@@ -9,6 +9,20 @@ package tf.veriny.ss76.engine
 import okio.BufferedSink
 import okio.BufferedSource
 
+// TODO: we want to have a proper interface with sections.
+// probably use the following format:
+//
+// == Header ==
+// magic number: ss76
+// engine version: short (2b)
+// game namespace: pascal string
+// game version: short (2b)
+// section table count: int (4b)
+// section entry name: pascal string
+// section entry size: int
+//
+// then section entries are stored inline and are system-specific.
+
 /**
  * Defines something that is saved to a checkpoint file.
  */

@@ -11,11 +11,12 @@ package tf.veriny.ss76.engine.scene
  */
 public fun Collection<TextualNode>.debugPrintTimings() {
     for (node in this) {
-        val text = when {
-            node.causesNewline -> "<CRLF>"
+        var text = when {
             node.text.isBlank() -> "<empty>"
             else -> node.text
         }
+        if (node.causesNewline) text = "$text<CRLF>"
+
         print("|${node.startFrame}|${node.endFrame}|$text")
         if (node.causesNewline) println()
         else if (node.causesSpace) print(" ")

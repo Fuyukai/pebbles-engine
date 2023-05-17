@@ -16,13 +16,12 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import ktx.app.KtxInputAdapter
 import tf.veriny.ss76.engine.*
 import tf.veriny.ss76.engine.font.FontManager
+import tf.veriny.ss76.engine.psm.PsmFragmentManager
 import tf.veriny.ss76.engine.renderer.OddCareRenderer
 import tf.veriny.ss76.engine.scene.SceneManager
-import tf.veriny.ss76.engine.scene.createAndRegisterScene
 import tf.veriny.ss76.engine.screen.ErrorScreen
-import tf.veriny.ss76.engine.system.CheckpointScene
-import tf.veriny.ss76.engine.system.SYSTEM_STARTUP_NAME
-import tf.veriny.ss76.engine.system.registerSystemScenes
+import tf.veriny.ss76.engine.system.CheckpointSceneManager
+import tf.veriny.ss76.engine.system.registerAboutScene
 import tf.veriny.ss76.engine.util.EktFiles
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
@@ -30,7 +29,10 @@ import kotlin.time.measureTime
 /**
  * The EngineState object wraps systems required to run the SS76 engine.
  */
-public class EngineState(public val settings: SS76Settings) {
+public class EngineState(
+    public val settings: SS76Settings,
+    public val preferencesManager: PreferencesManager,
+) {
     private val demoRenderer = OddCareRenderer()
 
     /** Used to conditionally enable or disable debugging content. */
@@ -43,8 +45,11 @@ public class EngineState(public val settings: SS76Settings) {
     /** Used for mapping YAML content. */
     public val yamlLoader: ObjectMapper = ObjectMapper(YAMLFactory())
 
+    /** Used for loading PSM data. */
+    public val psmLoader: PsmFragmentManager = PsmFragmentManager(preferencesManager["language"])
+
     /** Used for manging assets. */
-    public val assets: EngineAssetManager = EngineAssetManager()
+    public val assets: EngineAssetManager = EngineAssetManager(this)
 
     /** The font manager for rendering text. */
     public val fontManager: FontManager = FontManager(this)
@@ -89,7 +94,7 @@ public class EngineState(public val settings: SS76Settings) {
                     // push demo UI
                     if (SS76.IS_DEMO || isDebugMode) {
                         repeat(sceneManager.stackSize - 1) { sceneManager.exitScene() }
-                        sceneManager.changeScene("demo-meta-menu")
+                        sceneManager.swapScene("demo-meta-menu")
                     }
                 }
 
@@ -109,14 +114,14 @@ public class EngineState(public val settings: SS76Settings) {
     })
 
     private fun openDataScene() {
-        val scene = sceneManager.createAndRegisterScene("engine.data-scene") {
+        /*val scene = sceneManager.createAndRegisterScene("engine.data-scene") {
             onLoad { it.timer = 99999 }
 
             page {
                 line("SS76 Engine Info Scene")
                 newline()
 
-                line("Registered scenes: ${sceneManager.registeredScenes.size}")
+                line("Registered scenes: ${sceneManager.registerScene().size}")
                 line("Global timer: $globalTimer")
                 var memoryUsage = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
                 memoryUsage /= (1024 * 1024)
@@ -128,7 +133,7 @@ public class EngineState(public val settings: SS76Settings) {
             sceneManager.changeScene(scene)
         } else {
             sceneManager.pushScene(scene)
-        }
+        }*/
     }
 
     /**
@@ -144,26 +149,27 @@ public class EngineState(public val settings: SS76Settings) {
             }
             println("All fonts generated in $fontGenTime.")
 
-            val checkpoints = CheckpointScene(this)
-            checkpoints.register()
-
-            settings.initialiser(this)
-
             val loadTime = measureTime { assets.autoload() }
             println("Auto-loaded all assets in $loadTime.")
+
+            sceneManager.registerAboutScene()
+            settings.initialiser(this)
+
+            val checkpoints = CheckpointSceneManager(this)
+            checkpoints.rebuild()
+
             EktFiles.RESOLVER.closeAllFilesystems()
-
-            var scene = settings.startupScene ?: System.getProperty("ss76.scene")
-            if (scene == null) {
-                scene = if (isDebugMode) "demo-meta-menu" else "main-menu"
-            }
-
-            registerSystemScenes(scene, sceneManager)
         }
 
-        println("Initialised SS76 engine with ${sceneManager.registeredSceneCount} scenes in $fullTime.")
+        println("Initialised SS76 engine with ${sceneManager.registeredScenes} scenes in $fullTime.")
 
-        sceneManager.pushScene(SYSTEM_STARTUP_NAME)
+        var scene = settings.startupScene ?: System.getProperty("ss76.scene")
+        if (scene == null) {
+            scene = if (isDebugMode) "demo-meta-menu" else "main-menu"
+        }
+
+        sceneManager.pushScene(scene)
+
     }
 
     /**

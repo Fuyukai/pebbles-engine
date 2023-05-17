@@ -25,13 +25,3 @@ fonts:
     alt:
         path: "engine/fonts/Mx437_PhoenixEGA_8x8-2y.ttf"
         size: 32
-
-    ## sector fonts
-    ui-sector-target:
-        path: "engine/fonts/Mx437_Wang_Pro_Mono.ttf"
-        size: 36
-        default_colour: "orange"
-
-    ui-sector-sidebar:
-        path: "engine/fonts/Mx437_Wang_Pro_Mono.ttf"
-        size: 36

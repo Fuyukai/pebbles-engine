@@ -1,0 +1,12 @@
+----- demo-meta-menu
+$[instant=]
+This is the Pebbles Engine demo menu scene. Consult the fragment files
+for more information on how these scenes are implemented. $[nl=2]
+
+$[`=cs-engine.pebbles.about,@=salmon] Engine info $[pop=1, nl=2]
+
+$[`=cs-demo.colours,@=salmon] Colour demonstration $[pop=]
+
+----- demo.colours
+
+$[@=green] Green

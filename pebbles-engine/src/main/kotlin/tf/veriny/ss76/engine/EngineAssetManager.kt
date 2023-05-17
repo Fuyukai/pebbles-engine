@@ -14,6 +14,7 @@ import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import ktx.assets.getAsset
+import tf.veriny.ss76.EngineState
 import tf.veriny.ss76.engine.MusicManager.Companion.NO_MUSIC
 import tf.veriny.ss76.engine.util.EktFiles
 import java.net.URI
@@ -25,7 +26,7 @@ import kotlin.reflect.KClass
 /**
  * Wraps a libgdx asset manager with SS76-specific knowledge.
  */
-public class EngineAssetManager {
+public class EngineAssetManager(private val state: EngineState) {
     public class AssetLoadException(
         public val name: String,
         message: String = "Failed to load asset 'name'",
@@ -112,6 +113,11 @@ public class EngineAssetManager {
                 gdxAssets.load("data/$path", TextureAtlas::class.java)
             }
 
+            path.startsWith("Event") && path.extension == "psmf" -> {
+                println("LOAD (SCX): $path")
+                state.psmLoader.loadPsmBundle(path)
+            }
+
             else -> {
                 for (type in assetTypes.values) {
                     if (path.startsWith(type.pathPrefix) && path.extension == type.extension) {
@@ -132,9 +138,7 @@ public class EngineAssetManager {
     @OptIn(ExperimentalPathApi::class)
     public fun autoload() {
         val assetsDir = javaClass.classLoader.getResource("data")?.toURI()
-        if (assetsDir == null) {
-            return println("warning: no assets found!")
-        }
+            ?: return println("warning: no assets found!")
 
         if (assetsDir.scheme == "file") {
             val path = assetsDir.toPath()

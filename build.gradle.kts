@@ -59,6 +59,7 @@ subprojects {
                     "-Xlambdas=indy",  // Forcibly use invokedynamic for all lambdas.
                 )
                 jvmTarget = "19"
+                languageVersion = "1.9"
             }
         }
 

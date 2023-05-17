@@ -35,7 +35,7 @@ public class SceneDefinition(
     public val advSubRenderer: ADVSubRenderer? = null,
 
     /** The functions to run when this scene loads. */
-    public val onLoadHandlers: List<onLoad> = listOf(),
+    public val onLoadHandlers: List<OnLoadHandler> = listOf(),
 
     override val modifiers: SceneModifiers
 ) : VirtualNovelSceneDefinition {
@@ -51,7 +51,7 @@ public class SceneDefinition(
     public val hasCustomOnLoad: Boolean = onLoadHandlers.isNotEmpty()
 
     override fun onLoad(state: SceneState) {
-        onLoadHandlers.forEach { it.invoke(state) }
+        onLoadHandlers.forEach { it.onLoad(state) }
     }
 
     override fun createAdvRenderer(): ADVSubRenderer? {

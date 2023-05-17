@@ -1,6 +1,13 @@
+import com.gorylenko.GitPropertiesPluginExtension
+import org.lwjgl.Lwjgl
+import org.lwjgl.Release
+import org.lwjgl.lwjgl
+
 plugins {
     id("org.jetbrains.kotlin.jvm")
     id("maven-publish")
+    id("org.lwjgl.plugin").version("0.0.34")
+    id("com.gorylenko.gradle-git-properties").version("2.4.1")
 }
 
 version = "0.8.0"
@@ -35,6 +42,28 @@ dependencies {
     api("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.0")
     api("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.0")
 
+    // override libgdx's lwjgl3, at least until 3.3.2 is transitive via gdx-backend-lwjgl3
+    // 3.3.1 doesn't work under intellij debugger on java 19+ due to JNI changes. 3.3.2 fixes this.
+    lwjgl {
+        version = Release.`3_3_2`
+        implementation(
+            Lwjgl.Module.glfw,
+            Lwjgl.Module.openal,
+            Lwjgl.Module.jemalloc,
+            Lwjgl.Module.opengl,
+            Lwjgl.Module.stb,
+        )
+    }
+
+}
+
+configure<GitPropertiesPluginExtension> {
+    keys = listOf(
+        "git.branch", "git.build.version",
+        "git.commit.id", "git.commit.id.abbrev",
+        "git.commit.time",
+        "git.commit.message.short",
+    )
 }
 
 

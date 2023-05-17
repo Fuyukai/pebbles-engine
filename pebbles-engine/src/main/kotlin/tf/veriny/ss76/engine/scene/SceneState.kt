@@ -52,7 +52,7 @@ public class SceneState(
         }
 
         if (definition.modifiers.enableTextSkipOnSeen) {
-            return engineState.sceneManager.hasCompletedScene(definition.sceneId)
+            return engineState.sceneManager.hasSeenScene(definition.sceneId)
         }
 
         return false
@@ -88,7 +88,7 @@ public class SceneState(
      * Changes the current scene.
      */
     public fun changeScene(sceneName: String) {
-        engineState.sceneManager.changeScene(sceneName)
+        engineState.sceneManager.swapScene(sceneName)
     }
 
     /** Pushes a new scene onto the scene stack. */

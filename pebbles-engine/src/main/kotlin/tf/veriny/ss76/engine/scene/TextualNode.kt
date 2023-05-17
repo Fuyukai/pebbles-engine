@@ -29,7 +29,7 @@ public data class TextualNode(
     /** If the colour for this node is linked to scene visitation state. */
     public var colourLinkedToButton: Boolean = false,
     /** The special effects for this node. */
-    public var effects: MutableSet<Effect> = mutableSetOf(),
+    public var effects: Set<Effect> = setOf(),
     /** The left padding (in characters) for this node. */
     public var padding: Int = 0,
     /** The associated button ID for this node. */

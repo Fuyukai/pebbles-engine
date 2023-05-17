@@ -31,6 +31,7 @@ public class NVLScreen(
     private val currentRenderer: NVLRendererV3
 
     init {
+        println("creating renderer for ${scene.definition.sceneId}")
         viewport.update(
             /* screenWidth = */ Gdx.graphics.width,
             /* screenHeight = */ Gdx.graphics.height,
@@ -65,7 +66,7 @@ public class NVLScreen(
     }
 
     override fun keyDown(keycode: Int): Boolean {
-        val current = state.sceneManager.currentScene
+        val current = scene
         val pagination = current.definition.modifiers.drawPageButtons
 
         if (pagination && (keycode == Input.Keys.LEFT)) {
