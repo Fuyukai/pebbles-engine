@@ -249,7 +249,12 @@ public class NVLRendererV3(
                 colour = state.definition.modifiers.textFadeInColour
             }
         } else {
-            if (state.definition.modifiers.enableTextFadeIn && colour == null) {
+            if (
+                state.definition.modifiers.enableTextFadeIn &&
+                colour == null &&
+                // prevent fading in of instant nodes (or psuedo-nodes)
+                frameDataNode.startFrame != frameDataNode.endFrame
+            ) {
                 // if not truncated, then we calculate an intermediate colour instead.
                 val fadeFrames = state.definition.modifiers.textFadeInFrames
                 val fadeEnd = frameDataNode.endFrame + fadeFrames
