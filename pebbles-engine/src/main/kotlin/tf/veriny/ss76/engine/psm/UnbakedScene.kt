@@ -66,16 +66,19 @@ public class UnbakedScene(
             return cachedScene!!
         }
 
-        println("SCENE BAKERY: ${if (!isPreBaking) "JIT " else ""}baking scene $sceneId")
+        if (!isPreBaking) {
+            println("SCENE BAKERY: JIT baking scene $sceneId")
+        }
         val bakeTime = measureTimedValue {
             pages.map { bakePage(it, state) }
         }
         val us = bakeTime.duration.inWholeMicroseconds
-        println("SCENE BAKERY: Took ${us/1000}ms!")
-        if (!isPreBaking && us > 1_000_000/60) {
-            println("Warning: Scene baking took too long!")
+        if (!isPreBaking) {
+            println("SCENE BAKERY: Took ${us / 1000}ms!")
+            if (us > 1_000_000 / 60) {
+                println("Warning: Scene baking took too long!")
+            }
         }
-
 
         val buttonMap = buttons.associateByTo(mutableMapOf()) { it.name }
 

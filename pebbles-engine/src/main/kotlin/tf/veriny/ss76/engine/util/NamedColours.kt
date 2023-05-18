@@ -7,6 +7,7 @@
 package tf.veriny.ss76.engine.util
 
 import com.badlogic.gdx.graphics.Color
+import java.util.*
 
 public val NAMED_COLOURS: Map<String, Color> = mutableMapOf(
     "white" to Color.WHITE,
@@ -27,3 +28,12 @@ public val NAMED_COLOURS: Map<String, Color> = mutableMapOf(
     "yellow" to Color.YELLOW,  // e
     "black" to Color.BLACK,   // f
 )
+
+public fun main() {
+    for (key in NAMED_COLOURS.keys) {
+        val caps = key.replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+        }
+        println("#[@=$key] $caps $[nl=1]")
+    }
+}

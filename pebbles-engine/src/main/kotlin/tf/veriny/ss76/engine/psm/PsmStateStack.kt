@@ -25,6 +25,9 @@ internal class PsmStateStack(private val default: StackEntry) {
         /** The per-node effects to use. */
         var effects: MutableSet<TextualNode.Effect> = mutableSetOf(),
 
+        /** The font that the node uses. */
+        var font: String? = null,
+
         /** If the colour of the node is linked to the button's seen status. */
         var colourLinkedToButton: Boolean? = null,
 
@@ -75,6 +78,7 @@ internal class PsmStateStack(private val default: StackEntry) {
     val instant: Boolean get() = getValueOrNull { it.instant } ?: false
     val lastButton: String? get() = getValueOrNull { it.lastButton }
     val colourLinkedToButton: Boolean get() = getValueOrNull { it.colourLinkedToButton } ?: false
+    val font: String get() = getValueOrNull { it.font } ?: "default"
 
     val enableNewlineLinger: Boolean get() = getValueOrNull { it.enableNewlineLinger } ?: true
     val newlineLingerFrames: Int get() = getValueOrNull { it.newlineLingerFrames } ?: 45

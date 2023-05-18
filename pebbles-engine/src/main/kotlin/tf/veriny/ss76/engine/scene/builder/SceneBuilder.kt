@@ -19,7 +19,7 @@ public value class PageIndex(public val index: Int)
  * Class used for building scenes.
  */
 public class SceneBuilder
-internal constructor(
+@PublishedApi internal constructor(
     private val state: EngineState,
     private val sceneId: String,
     /** The scene modifiers for this scene. May be copied and edited. */
@@ -74,6 +74,13 @@ internal constructor(
         val index = pages.size
         pages.add(builder.includedFragments)
         return PageIndex(index)
+    }
+
+    /**
+     * Adds a new single-fragment page to this scene.
+     */
+    public fun page(id: String): PageIndex {
+        return page { addFragment(id) }
     }
 
     /**

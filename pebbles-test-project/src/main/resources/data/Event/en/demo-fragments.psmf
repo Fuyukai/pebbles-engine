@@ -1,12 +1,57 @@
 ----- demo-meta-menu
 $[instant=]
 This is the Pebbles Engine demo menu scene. Consult the fragment files
-for more information on how these scenes are implemented. $[nl=2]
+for more information on how these scenes are implemented. #[nl=2]
 
-$[`=cs-engine.pebbles.about,@=salmon] Engine info $[pop=1, nl=2]
+$[`=ps-engine.pebbles.about,@=salmon] Engine info $[pop=1, nl=2]
 
-$[`=cs-demo.colours,@=salmon] Colour demonstration $[pop=]
+$[`=ps-demo.colours,@=salmon] Colour demonstration $[pop=1, nl=1]
+$[`=ps-demo.effects,@=salmon] Effects demonstrations $[pop=1, nl=1]
+$[`=ps-demo.font-changes,@=salmon] Font changing demo $[pop=1, nl=1]
 
------ demo.colours
+----- demo.colours.1
 
-$[@=green] Green
+Named colour demonstration: #[nl=2]
+
+#[@=white] White #[nl=1]
+#[@=red] Red #[nl=1]
+#[@=pink] Pink #[nl=1]
+#[@=purple] Purple #[nl=1]
+#[@=green] Green #[nl=1]
+#[@=lime] Lime #[nl=1]
+#[@=teal] Teal #[nl=1]
+#[@=blue] Blue #[nl=1]
+#[@=cyan] Cyan #[nl=1]
+#[@=sky] Sky #[nl=1]
+#[@=slate] Slate #[nl=1]
+#[@=orange] Orange #[nl=1]
+#[@=salmon] Salmon #[nl=1]
+#[@=magenta] Magenta #[nl=1]
+#[@=violet] Violet #[nl=1]
+#[@=yellow] Yellow #[nl=1]
+#[@=black] Black #[nl=1]
+
+----- demo.colours.2
+
+Of course, you can also do #[@=c27ba0] custom #[@=CAFEBA] colours
+using RGB numbers.
+
+----- demo.effects
+
+List of effects: $[nl=2]
+
+$[@=green] Shuffled text: $[pop=] $[effects=shuftxt] sample text $[pop=1, nl=1]
+$[@=green] Shuffled numbers: $[pop=] $[effects=shufnum] 1223 434535 $[pop=1, nl=1]
+$[@=green] Mojibake: $[pop=] $[effects=mojibake] sample text $[pop=1, nl=2]
+
+$[@=green] Rainbow: $[pop=] $[effects=rainbowify] rainbow text! $[pop=1]
+
+----- demo.font-changes
+
+This text is in the default font. (Obviously). $[nl=2]
+
+$[font=alt] This text, however, is in the alternative font. $[pop=1] $[nl=2]
+
+Please note that newlines are sensitive to font changes, meaning you
+will want to separate out your \$[pop=1] and \$[nl=...] directives
+for the best effect.

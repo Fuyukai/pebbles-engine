@@ -1,6 +1,7 @@
 package tf.veriny.ss76.engine.psm
 
 import com.badlogic.gdx.graphics.Color
+import tf.veriny.ss76.engine.SS76EngineInternalError
 import tf.veriny.ss76.engine.psm.PsmStateStack.StackEntry
 import tf.veriny.ss76.engine.scene.TextualNode
 import tf.veriny.ss76.engine.util.NAMED_COLOURS
@@ -59,6 +60,9 @@ public class SceneBaker {
         addHandler("chomp") {
             chomp = it.toBooleanHandleBlank(true)
         }
+        addHandler("font") {
+            font = it
+        }
 
         addHandler("clrf", "nl", "newline", handler = ::handleNewline)
 
@@ -69,7 +73,8 @@ public class SceneBaker {
             if (colourName in NAMED_COLOURS) {
                 this.colour = NAMED_COLOURS[colourName]!!
             } else {
-                this.colour = Color(it.toInt(radix = 16))
+                this.colour = Color().also { it.a = 1.0f }
+                Color.rgb888ToColor(this.colour, it.toInt(radix = 16))
             }
         }
 
@@ -238,7 +243,8 @@ public class SceneBaker {
             endFrame = frameCounter + state.framesPerWord,
             colour = state.colour,
             causesSpace = !state.chomp,
-            effects = state.effects
+            effects = state.effects,
+            fontName = state.font,
         )
 
         // update button status
@@ -277,6 +283,33 @@ public class SceneBaker {
 
     }
 
+    private fun handle(token: PsmToken){
+        when (token) {
+            is PsmToken.Newline -> {
+                // newlines are ignored
+            }
+            is PsmToken.Text -> {
+                handleTextualNode(token)
+                state.removeTemp()
+            }
+            is PsmToken.Dollar -> {
+                handleDirective(temporary = false)
+            }
+            is PsmToken.Sharp -> {
+                handleDirective(temporary = true)
+            }
+            is PsmToken.Space -> {
+                // strip leading spaces
+                if (this.lineLength > 0) {
+                    this.lineLength += 1
+                }
+            }
+            else -> {
+                throw PsmSyntaxError("unexpected token $token")
+            }
+        }
+    }
+
     /**
      * Bakes a single scene into a list of textual nodes.
      */
@@ -290,27 +323,12 @@ public class SceneBaker {
         tokenizer.tokenise(sceneText)
 
         while (true) {
-            when (val nextToken = tokenizer.consume()) {
-                is PsmToken.EndOfScene -> break
-                is PsmToken.Newline -> {
-                    // newlines are ignored
-                }
-                is PsmToken.Text -> {
-                    handleTextualNode(nextToken)
-                    state.removeTemp()
-                }
-                is PsmToken.Dollar -> {
-                    handleDirective(temporary = false)
-                }
-                is PsmToken.Sharp -> {
-                    handleDirective(temporary = true)
-                }
-                is PsmToken.Space -> {
-                    this.lineLength += 1
-                }
-                else -> {
-                    throw PsmSyntaxError("unexpected token $nextToken")
-                }
+            val token = tokenizer.consume()
+            if (token == PsmToken.EndOfScene) break
+            try {
+                handle(token)
+            } catch (e: Exception) {
+                throw SS76EngineInternalError("Failed to handle token '$token'!", e)
             }
         }
 

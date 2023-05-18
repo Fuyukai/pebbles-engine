@@ -3,6 +3,8 @@ $[nl=]
 
 ----- engine.checkpoint.header
 
+$[instant=]
+
 $[@=slate] Checkpoint Menu $[pop=] $[nl=2]
 
 A checkpoint saves the current state of the game, including the
