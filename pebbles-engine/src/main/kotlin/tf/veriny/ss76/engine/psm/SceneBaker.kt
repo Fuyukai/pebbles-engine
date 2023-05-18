@@ -243,13 +243,18 @@ public class SceneBaker {
             }
         }
 
+        var effects = state.effects
+        if (effects.isEmpty()) {
+            effects = emptySet()
+        }
+
         val node = TextualNode(
             text.toString(),
             startFrame = frameCounter,
             endFrame = frameCounter + state.framesPerWord,
             colour = state.colour,
             causesSpace = !state.chomp,
-            effects = state.effects,
+            effects = effects,
             fontName = state.font,
         )
 
