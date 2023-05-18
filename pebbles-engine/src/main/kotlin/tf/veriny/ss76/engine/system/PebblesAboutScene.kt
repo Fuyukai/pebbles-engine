@@ -52,7 +52,7 @@ internal fun SceneManager.registerAboutScene() {
                 
                 $[@=green] Git Commit: $[pop=] ${gitProperties["git.commit.id"]} $[nl=1]
                 $[@=green] Git Commit Time: $[pop=] ${gitProperties["git.commit.time"]} $[nl=1]
-                $[@=green] Git Commit Message: $[pop=] '${gitProperties["git.commit.message.short"]}'
+                $[@=green] Git Commit Message: $[pop=] $[left-margin=21] '${gitProperties["git.commit.message.short"]}' $[pop=]
                 $[nl=2]
                 
                 $[@=sky,left-margin=26] Baked with PSM 2.0 $[pop=1,nl=2]
