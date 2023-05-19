@@ -89,6 +89,10 @@ public class SaveManager(
                 segment.read(source)
             }
         }
+
+        for (saveable in needsSaving.values) {
+            saveable.postLoad()
+        }
     }
 
     /**

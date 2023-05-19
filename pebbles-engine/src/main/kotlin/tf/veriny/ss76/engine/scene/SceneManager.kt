@@ -45,6 +45,8 @@ public class SceneManager(internal val state: EngineState) : Saveable {
             field = value
         }
 
+    private val loadedIds = ArrayDeque<String>()
+
     /** The number of scenes currently on the scene stack. */
     public val stackSize: Int get() = sceneStack.size
 
@@ -181,7 +183,7 @@ public class SceneManager(internal val state: EngineState) : Saveable {
 
         val sceneCount = buffer.readInt()
         for (idx in 0 until sceneCount) {
-            pushScene(buffer.readPascalString())
+            loadedIds.addLast(buffer.readPascalString())
         }
 
         val seenCount = buffer.readInt()
@@ -203,5 +205,11 @@ public class SceneManager(internal val state: EngineState) : Saveable {
         for (scene in seenScenes) {
             buffer.writePascalString(scene)
         }
+    }
+
+    // do this here so that scene baking uses the checkpoint's event flags instead. that way
+    // there's no implicit load order dependency on the event flag manager.
+    override fun postLoad() {
+        for (id in loadedIds) pushScene(id)
     }
 }
