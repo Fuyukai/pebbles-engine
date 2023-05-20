@@ -3,8 +3,8 @@ Pebbles Engine
 
 Pebbles is my Virtual Novel game engine, written in Kotlin. It's named after my cat, Pebbles.
 
-This is the Okuu (0.8) branch, which contains significant rewrites over the old engine including
-a better renderer, music, better font generation, and so on.
+This is the Wriggle Nightbug (0.8) branch, which contains significant rewrites over the old engine
+including a better renderer, music, better font generation, and so on.
 
 Usage
 -----
