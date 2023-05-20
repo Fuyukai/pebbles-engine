@@ -1,5 +1,4 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
-import com.diffplug.gradle.spotless.SpotlessTask
 import org.jetbrains.kotlin.gradle.dsl.ExplicitApiMode
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -14,8 +13,8 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        // TODO: rehost shape drawer on our maven for now...
-        maven(url = "https://jitpack.io")
+
+        maven(url = "https://maven.veriny.tf/releases")
     }
 }
 
