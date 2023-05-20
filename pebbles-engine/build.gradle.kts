@@ -36,7 +36,7 @@ publishing {
             licenses {
                 license {
                     name.set("MPL-2.0")
-                    url.set("https://www.gnu.org/licenses/gpl-3.0.en.html")
+                    url.set("https://www.mozilla.org/en-US/MPL/2.0/")
                 }
             }
 
