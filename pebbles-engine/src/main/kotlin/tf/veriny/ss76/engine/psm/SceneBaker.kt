@@ -135,7 +135,7 @@ public class SceneBaker {
         // add extra newline nodes instead
         val instant = state.instant
         val nlLinger = state.newlineLinger
-        val nlFrames = state.lingerFrames
+        val nlFrames = state.newlineLingerFrames
         val fpw = state.framesPerWord
 
         var lateFrameCounter = frameCounter
