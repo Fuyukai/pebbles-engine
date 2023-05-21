@@ -86,7 +86,7 @@ internal inline val PsmState.chomp: Boolean
     get() = find<Boolean, PsmChomp>(false)
 
 internal inline val PsmState.newlineLinger: Boolean
-    get() = find<Boolean, PsmNewlineLinger>(false)
+    get() = find<Boolean, PsmNewlineLinger>(true)
 
 internal inline val PsmState.colourButtonLink: Boolean
     get() = find<Boolean, PsmColourButtonLink>(false)
