@@ -159,7 +159,9 @@ public class EngineState(
             checkpoints.rebuild()
 
             EktFiles.RESOLVER.closeAllFilesystems()
-            sceneManager.prebakeScenes()
+
+            // val time = measureTime { sceneManager.prebakeScenes() }
+            // println("Pre-baked all static scenes in ${time.inWholeMilliseconds}ms.")
         }
 
         println("Initialised SS76 engine with ${sceneManager.registeredScenes} scenes in $fullTime.")
