@@ -45,7 +45,9 @@ public class PsmTokenizer {
 
     // built-in macros
     internal fun macroDialogue(name: String): String {
-        return "$name -- $[nl=1, left-margin=6]"
+        val replacedName = name.replace('_', ' ')
+
+        return "$replacedName -- $[nl=1, left-margin=6]"
     }
 
     init {
