@@ -3,11 +3,11 @@ $[instant=]
 This is the Pebbles Engine demo menu scene. Consult the fragment files
 for more information on how these scenes are implemented. #[nl=2]
 
-$[`=ps-engine.pebbles.about,@=salmon] Engine info $[pop=1, nl=2]
+$[`=ps-engine.pebbles.about,@=salmon] Engine info $$ $[nl=2]
 
-$[`=ps-demo.colours,@=salmon] Colour demonstration $[pop=1, nl=1]
-$[`=ps-demo.effects,@=salmon] Effects demonstrations $[pop=1, nl=1]
-$[`=ps-demo.font-changes,@=salmon] Font changing demo $[pop=1, nl=1]
+$[`=ps-demo.colours,@=salmon] Colour demonstration $$ $[nl=1]
+$[`=ps-demo.effects,@=salmon] Effects demonstrations $$ $[nl=1]
+$[`=ps-demo.font-changes,@=salmon] Font changing demo $$ $[nl=1]
 
 ----- demo.colours.1
 
@@ -40,18 +40,18 @@ using RGB numbers.
 
 List of effects: $[nl=2]
 
-$[@=green] Shuffled text: $[pop=] $[effects=shuftxt] sample text $[pop=1, nl=1]
-$[@=green] Shuffled numbers: $[pop=] $[effects=shufnum] 1223 434535 $[pop=1, nl=1]
-$[@=green] Mojibake: $[pop=] $[effects=mojibake] sample text $[pop=1, nl=2]
+$[@=green] Shuffled text: $$ $[effects=shuftxt] sample text $$ $[nl=1]
+$[@=green] Shuffled numbers: $$ $[effects=shufnum] 1223 434535 $$ $[nl=1]
+#[@=green] Mojibake: $[effects=mojibake] sample text $$ $[nl=2]
 
-$[@=green] Rainbow: $[pop=] $[effects=rainbowify] rainbow text! $[pop=1]
+#[@=green] Rainbow: $[effects=rainbowify] rainbow text! $$
 
 ----- demo.font-changes
 
 This text is in the default font. (Obviously). $[nl=2]
 
-$[font=alt] This text, however, is in the alternative font. $[pop=1] $[nl=2]
+$[font=alt] This text, however, is in the alternative font. $$ $[nl=2]
 
 Please note that newlines are sensitive to font changes, meaning you
-will want to separate out your \$[pop=1] and \$[nl=...] directives
+will want to separate out your \$$ and \$[nl=...] directives
 for the best effect.

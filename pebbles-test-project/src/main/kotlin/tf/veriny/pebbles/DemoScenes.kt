@@ -11,7 +11,7 @@ import tf.veriny.ss76.engine.scene.register
 import tf.veriny.ss76.engine.scene.sceneSequence
 
 public fun SceneManager.registerDemoScenes(): Unit = sceneSequence {
-    sharedModifiers = sharedModifiers.copy(drawPageButtons = true)
+    modifiers = modifiers.copy(drawPageButtons = true)
 
     register("demo-meta-menu")
     register("demo.colours") {

@@ -8,7 +8,7 @@ package tf.veriny.ss76.engine.psm
 
 import com.badlogic.gdx.graphics.Color
 import tf.veriny.ss76.engine.SS76EngineInternalError
-import tf.veriny.ss76.engine.psm.PsmStateStack.StackEntry
+import tf.veriny.ss76.engine.psm.stack.*
 import tf.veriny.ss76.engine.scene.TextualNode
 import tf.veriny.ss76.engine.util.NAMED_COLOURS
 import tf.veriny.ss76.toBooleanHandleBlank
@@ -19,21 +19,16 @@ import tf.veriny.ss76.toBooleanHandleBlank
 @OptIn(ExperimentalStdlibApi::class)
 public class SceneBaker {
     private companion object {
-        private val DEFAULT_STATE = StackEntry(
-            enableNewlineLinger = true,
-            newlineLingerFrames = 45,
-            framesPerWord = 5,
-            rightMargin = 70,
-        )
+
     }
 
     public val tokenizer: PsmTokenizer = PsmTokenizer()
-    private val state = PsmStateStack(DEFAULT_STATE)
+    private val state = PsmState()
     private val currentNodes = mutableListOf<TextualNode>()
 
-    private val directiveHandlers = mutableMapOf<String, StackEntry.(String) -> Unit>()
+    private val directiveHandlers = mutableMapOf<String, (String) -> PsmStateEntry<*>?>()
 
-    private fun addHandler(vararg keys: String, handler: StackEntry.(String) -> Unit) {
+    private fun addHandler(vararg keys: String, handler: (String) -> PsmStateEntry<*>?) {
         for (key in keys) {
             directiveHandlers[key] = handler
         }
@@ -41,47 +36,49 @@ public class SceneBaker {
 
     init {
         addHandler("pop") {
-            val count = if (it.isBlank()) 1 else it.toInt()
-            // extra + 1 to remove the one immediately put on
-            repeat(count + 1) { state.pop() }
+            throw PsmSyntaxError("use '$$' for popping")
         }
         addHandler("newline-linger") {
-            enableNewlineLinger = it.toBooleanHandleBlank(true)
+            PsmNewlineLinger(it.toBooleanHandleBlank(true))
         }
         addHandler("newline-linger-frames") {
-            newlineLingerFrames = it.toInt()
+            PsmNewlineLingerFrames(it.toInt())
         }
         addHandler("frames-per-word") {
-            framesPerWord = it.toInt()
+            PsmFramesPerWord(it.toInt())
         }
         addHandler("right-margin") {
-            rightMargin = it.toInt()
+            PsmRightMargin(it.toInt())
         }
         addHandler("left-margin") {
-            leftMargin = it.toInt()
+            PsmLeftMargin(it.toInt())
         }
         addHandler("instant") {
-            instant = it.toBooleanHandleBlank(true)
+            PsmInstant(it.toBooleanHandleBlank(true))
         }
         addHandler("chomp") {
-            chomp = it.toBooleanHandleBlank(true)
+            PsmChomp(it.toBooleanHandleBlank(true))
         }
         addHandler("font") {
-            font = it
+            PsmFont(it)
         }
 
-        addHandler("clrf", "nl", "newline", handler = ::handleNewline)
+        addHandler("clrf", "nl", "newline") {
+            handleNewline(it)
+            null
+        }
 
 
         addHandler("@", "colour") {
             val colourName = it.lowercase()
 
-            if (colourName in NAMED_COLOURS) {
-                this.colour = NAMED_COLOURS[colourName]!!
+            PsmColour(if (colourName in NAMED_COLOURS) {
+                NAMED_COLOURS[colourName]!!
             } else {
-                this.colour = Color().also { it.a = 1.0f }
-                Color.rgb888ToColor(this.colour, it.toInt(radix = 16))
-            }
+                val c = Color().also { it.a = 1.0f }
+                Color.rgb888ToColor(c, it.toInt(radix = 16))
+                c
+            })
         }
 
         addHandler("¬", "effects") {
@@ -90,11 +87,15 @@ public class SceneBaker {
                 TextualNode.Effect.entries.find { effect -> effect.name.lowercase() == name.lowercase() }
                     ?: throw PsmSyntaxError("No such effect: $name")
             }
-            this.effects = effects
+            PsmEffect(effects)
         }
 
-        addHandler("link-colour") { colourLinkedToButton = it.toBooleanStrictOrNull() ?: true }
-        addHandler("`", "button") { lastButton = it }
+        addHandler("link-colour") {
+            PsmColourButtonLink(it.toBooleanHandleBlank(true))
+        }
+        addHandler("`", "button") {
+            PsmButton(it)
+        }
     }
 
     // State variables:
@@ -103,7 +104,7 @@ public class SceneBaker {
     /// The current length of the processed line.
     private var lineLength = 0
 
-    private fun handleNewline(entry: StackEntry, value: String) {
+    private fun handleNewline(value: String) {
         var count = if (value.isBlank()) 1 else value.toInt()
         val node = currentNodes.lastOrNull()
 
@@ -132,7 +133,7 @@ public class SceneBaker {
             val lastNode = currentNodes.lastOrNull()
             if (
                 !state.instant &&
-                state.enableNewlineLinger &&
+                state.newlineLinger &&
                 lastNode != null &&
                 lastNode.causesNewline &&
                 lastNode.text.isNotBlank()
@@ -153,10 +154,18 @@ public class SceneBaker {
 
     private fun handleDirective(temporary: Boolean) {
         val parsed = mutableMapOf<String, String>()
-        if (tokenizer.consume() != PsmToken.LeftBracket) {
-            throw PsmSyntaxError(
-                "expected [ after raw '$' or '#' token, use a backslash to escape it"
-            )
+        // double dollar (or #$), pop node
+        when (tokenizer.consume()) {
+            PsmToken.Dollar -> {
+                state.pop()
+                return
+            }
+            PsmToken.LeftBracket -> Unit  // intentionally empty
+            else -> {
+                throw PsmSyntaxError(
+                    "expected [ after raw '$' or '#' token, use a backslash to escape it"
+                )
+            }
         }
 
         while (true) {
@@ -192,7 +201,7 @@ public class SceneBaker {
                 is PsmToken.Comma -> {
                     throw PsmSyntaxError("Directive '${name}' is missing a value!")
                 }
-                // allow conveniences like $[pop=]
+                // allow conveniences like $$
                 is PsmToken.RightBracket -> {
                     parsed[name] = ""
                     break
@@ -217,19 +226,29 @@ public class SceneBaker {
             tokenizer.consume()
         }
 
-        val entry = StackEntry(temp = temporary)
-        state.push(entry)
+        val entries = mutableListOf<PsmStateEntry<*>>()
+        val entry = PsmState.PsmStateNode(entries)
+        if (temporary) {
+            state.temp = entry
+        } else {
+            state.push(entry)
+        }
 
         for ((key, value) in parsed) {
             val handler = directiveHandlers[key] ?: throw PsmSyntaxError("Unknown directive $key")
-            handler.invoke(entry, value)
+            val maybeEntry = handler.invoke(value)
+            if (maybeEntry != null) entries.add(maybeEntry)
         }
 
+        if (entries.isEmpty()) {
+            if (temporary) state.temp = null
+            else state.pop()
+        }
     }
 
     private fun handleTextualNode(token: PsmToken.Text) {
         val text = StringBuilder(token.value)
-        var linger = state.linger
+        var linger = state.lingerFrames
         while (!tokenizer.peek().isWhitespace() && tokenizer.peek() != PsmToken.EndOfScene) {
             val nextToken = tokenizer.consume()
             text.append(nextToken.value)
@@ -243,7 +262,7 @@ public class SceneBaker {
             }
         }
 
-        var effects = state.effects
+        var effects = state.effect
         if (effects.isEmpty()) {
             effects = emptySet()
         }
@@ -259,10 +278,10 @@ public class SceneBaker {
         )
 
         // update button status
-        if (state.lastButton != null) {
-            node.buttonId = state.lastButton
+        if (state.button != null) {
+            node.buttonId = state.button
 
-            if (state.colourLinkedToButton) {
+            if (state.colourButtonLink) {
                 node.colourLinkedToButton = true
                 node.colour = null
             }

@@ -14,6 +14,6 @@ package tf.veriny.ss76.engine.psm
 @JvmInline
 public value class PsmSceneFragment(public val content: String) {
     public fun asInstant(): PsmSceneFragment {
-        return PsmSceneFragment("$[instant=] $content $[pop=]")
+        return PsmSceneFragment("$[instant=] $content $$")
     }
 }

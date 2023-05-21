@@ -5,7 +5,7 @@ $[nl=]
 
 $[instant=]
 
-$[@=slate] Checkpoint Menu $[pop=] $[nl=2]
+$[@=slate] Checkpoint Menu $$ $[nl=2]
 
 A checkpoint saves the current state of the game, including the
 current scene stack. $[nl=2]

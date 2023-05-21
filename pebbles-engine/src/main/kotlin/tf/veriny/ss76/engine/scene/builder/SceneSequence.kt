@@ -15,8 +15,8 @@ import tf.veriny.ss76.engine.scene.register
  * A sequence of scenes that all share the same modifiers.
  */
 public class SceneSequence
-internal constructor(public val sm: SceneManager) {
-    public var sharedModifiers: SceneModifiers = SceneModifiers()
+internal constructor(public val sm: SceneManager) : HasModifiers {
+    override var modifiers: SceneModifiers = SceneModifiers()
 
     /**
      * Registers a scene with the shared modifiers this sequence is currently using.
@@ -26,7 +26,7 @@ internal constructor(public val sm: SceneManager) {
         crossinline block: SceneBuilder.() -> Unit
     ): UnbakedScene {
         return sm.register(sceneId) {
-            modifiers = sharedModifiers
+            modifiers = this@SceneSequence.modifiers
             block()
         }
     }

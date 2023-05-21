@@ -29,8 +29,8 @@ public class SceneBuilder
     private val state: EngineState,
     private val sceneId: String,
     /** The scene modifiers for this scene. May be copied and edited. */
-    public var modifiers: SceneModifiers = SceneModifiers(),
-) {
+    override var modifiers: SceneModifiers = SceneModifiers(),
+) : HasModifiers {
     public inner class PageBuilder {
         internal val includedFragments: MutableList<PsmIncludedFragment> = mutableListOf()
 

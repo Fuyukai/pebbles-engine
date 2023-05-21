@@ -54,14 +54,14 @@ internal fun SceneManager.registerAboutScene() {
 
             addRawFragment("""
                 #[@=green] Pebbles #[@=pink] Engine #[@=AFEEEE] ${gitProperties["git.build.version"]}
-                (Branch: $[@=sky,chomp=true] ${gitProperties["git.branch"]} $[pop=1]) #[nl=2] 
+                (Branch: $[@=sky,chomp=true] ${gitProperties["git.branch"]} $$) #[nl=2] 
                 
-                $[@=green] Git Commit: $[pop=] ${gitProperties["git.commit.id"]} $[nl=1]
-                $[@=green] Git Commit Time: $[pop=] ${gitProperties["git.commit.time"]} $[nl=1]
-                $[@=green] Git Commit Message: $[pop=] $[left-margin=21] '${gitProperties["git.commit.message.short"]}' $[pop=]
+                $[@=green] Git Commit: $$ ${gitProperties["git.commit.id"]} $[nl=1]
+                $[@=green] Git Commit Time: $$ ${gitProperties["git.commit.time"]} $[nl=1]
+                $[@=green] Git Commit Message: $$ $[left-margin=21] '${gitProperties["git.commit.message.short"]}' $$
                 $[nl=2]
                 
-                $[@=sky,left-margin=26] Baked with PSM 2.0 $[pop=1,nl=2]
+                $[@=sky,left-margin=26] Baked with PSM 2.0 $$ $[nl=2]
                 
                 Powered by #[@=salmon,`=libgdx] LibGDX and #[@=salmon,`=lwjgl3] LWJGL3
             """.trimIndent())

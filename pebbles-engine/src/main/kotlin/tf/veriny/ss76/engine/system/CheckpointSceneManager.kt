@@ -50,19 +50,19 @@ public class CheckpointSceneManager(private val state: EngineState) {
                     addFragment("engine.checkpoint.empty")
                     addRawFragment("- $[@=salmon,`=save-$idx] ")
                     addFragment("engine.checkpoint.save")
-                    addRawFragment("$[pop=]")
+                    addRawFragment("$$")
                 } else {
                     val zone = ZoneId.systemDefault()
                     val it = time.toInstant().atZone(zone)
                     val ts = it.format(FORMATTER)
 
-                    addRawFragment("$[@=sky] $ts $[pop=]")
+                    addRawFragment("$[@=sky] $ts $$")
                     addRawFragment("- $[@=salmon,`=save-$idx] ")
                     addFragment("engine.checkpoint.save")
-                    addRawFragment("$[pop=] / ")
+                    addRawFragment("$$ / ")
                     addRawFragment("- $[@=salmon,`=load-$idx] ")
                     addFragment("engine.checkpoint.load")
-                    addRawFragment("$[pop=]")
+                    addRawFragment("$$")
 
                     scene.addButton(CheckpointButton(idx, load = true))
                 }
