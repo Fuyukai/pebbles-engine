@@ -59,6 +59,18 @@ public class SceneBuilder
             val rawFragment = PsmSceneFragment(content)
             includedFragments.add(PsmIncludedFragment(rawFragment, instant, condition))
         }
+
+        /**
+         * Adds a new raw fragment that is only shown if the provided flag is set.
+         */
+        public fun addFragmentIfFlag(
+            id: String,
+            instant: Boolean = false,
+            flag: String,
+            flagValue: Int
+        ) {
+            addFragment(id, instant) { it.eventFlagsManager.getValue(flag) == flagValue }
+        }
     }
 
     internal val onLoad = mutableListOf<OnLoadHandler>()
