@@ -16,6 +16,9 @@ public interface HasModifiers {
     public var modifiers: SceneModifiers
 }
 
+/**
+ * Causes the scene to fade-in.
+ */
 public fun HasModifiers.fadeIn() {
     modifiers = modifiers.copy(causesFadeIn = true)
 }

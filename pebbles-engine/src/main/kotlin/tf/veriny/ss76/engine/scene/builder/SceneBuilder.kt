@@ -8,6 +8,8 @@ package tf.veriny.ss76.engine.scene.builder
 
 import tf.veriny.ss76.EngineState
 import tf.veriny.ss76.engine.Button
+import tf.veriny.ss76.engine.ChangeSceneButton
+import tf.veriny.ss76.engine.PushSceneButton
 import tf.veriny.ss76.engine.psm.PsmIncludedFragment
 import tf.veriny.ss76.engine.psm.PsmSceneFragment
 import tf.veriny.ss76.engine.psm.UnbakedScene
@@ -94,6 +96,31 @@ public class SceneBuilder
      */
     public fun addButton(button: Button) {
         buttons.add(button)
+    }
+
+    // specific button helpers
+    /**
+     * Adds a new scene-change button (with the ID `cs-<sceneId>`) that sets the provided [flagId]
+     * to [flagValue] on click.
+     *
+     * This is only required if you are setting flags.
+     */
+    public fun addSceneChangeButton(sceneId: String, flagId: String? = null, flagValue: Int = 0) {
+        val buttonId = "cs-${sceneId}"
+        val button = ChangeSceneButton(buttonId, sceneId, setFlag = flagId, eventValue = flagValue)
+        addButton(button)
+    }
+
+    /**
+     * Adds a new push-scene button (with the ID `ps-<sceneId>`) that sets the provided [flagId]
+     * to [flagValue] on click.
+     *
+     * This is only required if you are setting flags.
+     */
+    public fun addPushChangeButton(sceneId: String, flagId: String? = null, flagValue: Int = 0) {
+        val buttonId = "cs-${sceneId}"
+        val button = PushSceneButton(buttonId, sceneId, setFlag = flagId, eventValue = flagValue)
+        addButton(button)
     }
 
     internal fun get(): UnbakedScene {
