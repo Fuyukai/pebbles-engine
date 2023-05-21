@@ -18,15 +18,15 @@ import tf.veriny.ss76.toBooleanHandleBlank
  */
 @OptIn(ExperimentalStdlibApi::class)
 public class SceneBaker {
-    private companion object {
-
-    }
+    private companion object;
 
     public val tokenizer: PsmTokenizer = PsmTokenizer()
     private val state = PsmState()
     private val currentNodes = mutableListOf<TextualNode>()
 
     private val directiveHandlers = mutableMapOf<String, (String) -> PsmStateEntry<*>?>()
+
+    private val markedFrames = IntArray(16)
 
     private fun addHandler(vararg keys: String, handler: (String) -> PsmStateEntry<*>?) {
         for (key in keys) {
@@ -96,6 +96,23 @@ public class SceneBaker {
         addHandler("`", "button") {
             PsmButton(it)
         }
+
+        addHandler("set-frame-counter") {
+            this.frameCounter = it.toInt()
+            null
+        }
+
+        addHandler("mark-frame-counter") {
+            val slot = if (it.isBlank()) 0 else it.toInt()
+            markedFrames[slot] = frameCounter
+            null
+        }
+
+        addHandler("restore-frame-counter") {
+            val slot = if (it.isBlank()) 0 else it.toInt()
+            frameCounter = markedFrames[slot]
+            null
+        }
     }
 
     // State variables:
@@ -116,6 +133,11 @@ public class SceneBaker {
         }
 
         // add extra newline nodes instead
+        val instant = state.instant
+        val nlLinger = state.newlineLinger
+        val nlFrames = state.lingerFrames
+        val fpw = state.framesPerWord
+
         var lateFrameCounter = frameCounter
         for (i in 0 until count) {
             // add blank nodes with no frame count.
@@ -132,15 +154,15 @@ public class SceneBaker {
 
             val lastNode = currentNodes.lastOrNull()
             if (
-                !state.instant &&
-                state.newlineLinger &&
+                !instant &&
+                nlLinger &&
                 lastNode != null &&
                 lastNode.causesNewline &&
                 lastNode.text.isNotBlank()
             ) {
                 val lastFrameCount = lastNode.endFrame - lastNode.startFrame
-                if (lastFrameCount <= state.framesPerWord) {
-                    lateFrameCounter += state.newlineLingerFrames
+                if (lastFrameCount <= fpw) {
+                    lateFrameCounter += nlFrames
                 }
             }
 

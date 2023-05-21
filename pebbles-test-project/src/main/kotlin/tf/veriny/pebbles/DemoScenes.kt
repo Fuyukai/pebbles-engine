@@ -20,4 +20,5 @@ public fun SceneManager.registerDemoScenes(): Unit = sceneSequence {
     }
     register("demo.effects")
     register("demo.font-changes")
+    register("demo.frame-counters")
 }

@@ -8,6 +8,7 @@ $[`=ps-engine.pebbles.about,@=salmon] Engine info $$ $[nl=2]
 $[`=ps-demo.colours,@=salmon] Colour demonstration $$ $[nl=1]
 $[`=ps-demo.effects,@=salmon] Effects demonstrations $$ $[nl=1]
 $[`=ps-demo.font-changes,@=salmon] Font changing demo $$ $[nl=1]
+$[`=ps-demo.frame-counters,@=salmon] Frame counter demo $$ $[nl=1]
 
 ----- demo.colours.1
 
@@ -55,3 +56,10 @@ $[font=alt] This text, however, is in the alternative font. $$ $[nl=2]
 Please note that newlines are sensitive to font changes, meaning you
 will want to separate out your \$$ and \$[nl=...] directives
 for the best effect.
+
+----- demo.frame-counters
+
+#[mark-frame-counter=0] This text appears first. #[mark-frame-counter=1] $[nl=1]
+#[set-frame-counter=200] This text appears after a while. $[nl=1]
+#[restore-frame-counter=0] This text appears first as well! $[nl=1]
+#[restore-frame-counter=1] This text appears second, kinda.
