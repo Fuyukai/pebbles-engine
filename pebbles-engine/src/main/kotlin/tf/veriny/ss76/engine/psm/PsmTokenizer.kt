@@ -6,10 +6,17 @@
 
 package tf.veriny.ss76.engine.psm
 
+import java.util.regex.Pattern
 import kotlin.reflect.KFunction
 
+// XXX: this just does NOT work for some insane reason!
 private val MACRO_REGEX =
     "%(?<name>\\w+)\\((?<args>\\s*\\w+\\s*(?:,\\s*\\w+\\s*)*)\\s*\\)%".toRegex()
+
+private val MACRO_PATTERN = Pattern.compile(
+    "%(?<name>\\w+)\\((?<args>\\s*\\w+\\s*(?:,\\s*\\w+\\s*)*)\\s*\\)%",
+    Pattern.MULTILINE
+)
 
 // code is not very good here. but it works.
 
@@ -28,12 +35,21 @@ public class PsmTokenizer {
     /**
      * Adds a new simple macro expansion function.
      */
-    public fun addMacro(key: String, fn: KFunction<String>) {
+    public fun addMacro(vararg key: String, fn: KFunction<String>) {
         check(fn.parameters.all { it.type.classifier == String::class }) {
             "Macro functions must take all string arguments"
         }
 
-        macros[key] = fn
+        for (k in key) macros[k] = fn
+    }
+
+    // built-in macros
+    internal fun macroDialogue(name: String): String {
+        return "$name -- $[nl=1, left-margin=6]"
+    }
+
+    init {
+        addMacro("dialogue", "dl", fn = ::macroDialogue)
     }
 
     /**
@@ -42,16 +58,18 @@ public class PsmTokenizer {
     private fun expandMacros(text: String): String {
         val built = StringBuilder()
         var lastIndex = 0
-        val found = MACRO_REGEX.findAll(built)
-        for (res in found) {
-            val start = res.range.first
-            val end = res.range.last + 1
+
+        val matcher = MACRO_PATTERN.matcher(text)
+        while (matcher.find()) {
+            val start = matcher.start()
+            val end = matcher.end()
 
             built.append(text.substring(lastIndex, start))
             lastIndex = end
 
-            val name = res.groups["name"]!!.value
-            val args = res.groups["args"]!!.value.split(",").map { it.trim() }
+            val groups = matcher.namedGroups()
+            val name = matcher.group(groups["name"]!!)
+            val args = matcher.group(groups["args"]!!).split(",").map { it.trim() }
             val fn = macros[name] ?: error("Unknown macro '$name'")
             val result = fn.call(*args.toTypedArray())
             built.append(result)

@@ -8,7 +8,9 @@ $[`=ps-engine.pebbles.about,@=salmon] Engine info $$ $[nl=2]
 $[`=ps-demo.colours,@=salmon] Colour demonstration $$ $[nl=1]
 $[`=ps-demo.effects,@=salmon] Effects demonstrations $$ $[nl=1]
 $[`=ps-demo.font-changes,@=salmon] Font changing demo $$ $[nl=1]
-$[`=ps-demo.frame-counters,@=salmon] Frame counter demo $$ $[nl=1]
+$[`=ps-demo.frame-counters,@=salmon] Frame counter demo $$ $[nl=2]
+
+$[`=ps-demo.dialogue,@=salmon] Dialogue macro demo $$ $[nl=2]
 
 ----- demo.colours.1
 
@@ -63,3 +65,12 @@ for the best effect.
 #[set-frame-counter=200] This text appears after a while. $[nl=1]
 #[restore-frame-counter=0] This text appears first as well! $[nl=1]
 #[restore-frame-counter=1] This text appears second, kinda.
+
+
+----- demo.dialogue
+
+This is an example of using the "dialogue" macro. $[nl=2]
+
+%dl(SOMEBODY)% Wow! This is auto-indented! $$ $[nl=2]
+
+Note that you must manually pop with \$$ at the end of your dialogue.
