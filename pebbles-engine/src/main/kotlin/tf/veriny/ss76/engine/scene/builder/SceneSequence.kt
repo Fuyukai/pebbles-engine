@@ -35,6 +35,8 @@ internal constructor(public val sm: SceneManager) {
      * Registers a single-fragment scene with the shared modifiers this sequence is currently using.
      */
     public fun register(sceneId: String): UnbakedScene {
-        return sm.register(sceneId)
+        return register(sceneId) {
+            page(sceneId)
+        }
     }
 }
