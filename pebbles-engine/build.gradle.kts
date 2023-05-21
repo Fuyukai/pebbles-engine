@@ -10,7 +10,7 @@ plugins {
     id("com.gorylenko.gradle-git-properties").version("2.4.1")
 }
 
-version = "0.8.0"
+version = "0.8.1"
 
 // can't be private due to insane inscrutible gradle bugs
 @Suppress("PropertyName")
