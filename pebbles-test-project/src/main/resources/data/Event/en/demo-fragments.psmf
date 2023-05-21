@@ -46,6 +46,7 @@ List of effects: $[nl=2]
 $[@=green] Shuffled text: $$ $[effects=shuftxt] sample text $$ $[nl=1]
 $[@=green] Shuffled numbers: $$ $[effects=shufnum] 1223 434535 $$ $[nl=1]
 #[@=green] Mojibake: $[effects=mojibake] sample text $$ $[nl=2]
+#[@=green] Shake: $[effects=shake] shaking! $$ $[nl=2]
 
 #[@=green] Rainbow: $[effects=rainbowify] rainbow text! $$
 

@@ -192,7 +192,7 @@ public class NVLRendererV3(
             realY += realRng.nextInt(-1, 1)
         }
 
-        font.drawWithColour(batch, text, realColour, x, y)
+        font.drawWithColour(batch, text, realColour, realX, realY)
 
         return if (getButtonRect) {
             val textWidth = font.widthOf(text)
