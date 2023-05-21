@@ -21,7 +21,9 @@ public class PsmTokenizer {
 
     private val macros = mutableMapOf<String, KFunction<String>>()
     private val tokens = ArrayDeque<PsmToken>()
-    private var lastText = ArrayDeque<Char>()
+    private var lastText = CharArray(0)
+
+    private var textCursor: Int = 0
 
     /**
      * Adds a new simple macro expansion function.
@@ -59,14 +61,14 @@ public class PsmTokenizer {
         return built.toString()
     }
 
-    private fun isCharEof(): Boolean = lastText.isEmpty()
+    private fun isCharEof(): Boolean = textCursor >= lastText.size
 
     private fun peekChar(): Char {
-        return lastText.first()
+        return lastText[textCursor]
     }
 
     private fun consumeChar(): Char {
-        return lastText.removeFirst()
+        return lastText[textCursor++]
     }
 
     private fun selectToken(char: Char): PsmToken {
@@ -117,7 +119,8 @@ public class PsmTokenizer {
     public fun tokenise(text: String) {
         val text = text.trim()
         val expanded = expandMacros(text)
-        this.lastText = ArrayDeque(expanded.toCharArray().toList())
+        this.lastText = expanded.toCharArray()
+        this.textCursor = 0
         this.tokens.clear()
 
         while (!isCharEof()) {

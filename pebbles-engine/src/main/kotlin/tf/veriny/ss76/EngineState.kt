@@ -101,10 +101,10 @@ public class EngineState(
                 Input.Keys.F3 -> {
 
                 }
-                // reserved
                 Input.Keys.F4 -> {
                     EktFiles.RESOLVER.closeAllFilesystems()
                 }
+                // reserved
                 Input.Keys.F5 -> {}
                 else -> return super.keyDown(keycode)
             }
