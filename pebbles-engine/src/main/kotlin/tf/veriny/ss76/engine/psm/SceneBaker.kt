@@ -178,11 +178,11 @@ public class SceneBaker {
         val parsed = mutableMapOf<String, String>()
         // double dollar (or #$), pop node
         when (tokenizer.consume()) {
-            PsmToken.Dollar -> {
+            PsmTokenValue.Dollar -> {
                 state.pop()
                 return
             }
-            PsmToken.LeftBracket -> Unit  // intentionally empty
+            PsmTokenValue.LeftBracket -> Unit  // intentionally empty
             else -> {
                 throw PsmSyntaxError(
                     "expected [ after raw '$' or '#' token, use a backslash to escape it"
@@ -193,26 +193,26 @@ public class SceneBaker {
         while (true) {
             val next = tokenizer.consumeIgnoringSpaces()
 
-            if (next !is PsmToken.Text) {
+            if (next !is PsmTokenValue.Text) {
                 throw PsmSyntaxError("Expected a textual node when parsing a directive")
             }
 
-            val name = next.value.lowercase()
-            if (tokenizer.consumeIgnoringSpaces() !is PsmToken.Equals) {
+            val name = next.text.lowercase()
+            if (tokenizer.consumeIgnoringSpaces() !is PsmTokenValue.Equals) {
                 throw PsmSyntaxError("Expected an equals sign when parsing a directive value")
             }
 
             val valueToken = tokenizer.consumeIgnoringSpaces()
             when (valueToken) {
-                is PsmToken.Text -> {
+                is PsmTokenValue.Text -> {
                     // consume any full-stops e.g. for scene names
-                    val text = StringBuilder(valueToken.value)
+                    val text = StringBuilder(valueToken.text)
                     while (true) {
-                        if (tokenizer.peek() == PsmToken.FullStop) {
+                        if (tokenizer.peek() == PsmTokenValue.FullStop) {
                             text.append('.')
                             tokenizer.consume()
-                        } else if (tokenizer.peek() is PsmToken.Text) {
-                            text.append(tokenizer.consume().value)
+                        } else if (tokenizer.peek() is PsmTokenValue.Text) {
+                            text.append(tokenizer.consume().text)
                         } else {
                             break
                         }
@@ -220,11 +220,11 @@ public class SceneBaker {
 
                     parsed[name] = text.toString()
                 }
-                is PsmToken.Comma -> {
+                is PsmTokenValue.Comma -> {
                     throw PsmSyntaxError("Directive '${name}' is missing a value!")
                 }
                 // allow conveniences like $$
-                is PsmToken.RightBracket -> {
+                is PsmTokenValue.RightBracket -> {
                     parsed[name] = ""
                     break
                 }
@@ -234,17 +234,17 @@ public class SceneBaker {
             }
 
 
-            parsed[name] = valueToken.value
+            parsed[name] = valueToken.text
 
             val final = tokenizer.consumeIgnoringSpaces()
-            if (final == PsmToken.RightBracket) break
-            else if (final != PsmToken.Comma) {
+            if (final == PsmTokenValue.RightBracket) break
+            else if (final != PsmTokenValue.Comma) {
                 throw PsmSyntaxError("Expected a comma when parsing a directive value")
             }
         }
 
         // strip a single extra newline after directives to make raw PSM more readable.
-        if (tokenizer.peek() == PsmToken.Newline) {
+        if (tokenizer.peek() == PsmTokenValue.Newline) {
             tokenizer.consume()
         }
 
@@ -268,17 +268,17 @@ public class SceneBaker {
         }
     }
 
-    private fun handleTextualNode(token: PsmToken.Text) {
-        val text = StringBuilder(token.value)
+    private fun handleTextualNode(token: PsmTokenValue.Text) {
+        val text = StringBuilder(token.text)
         var linger = state.lingerFrames
-        while (!tokenizer.peek().isWhitespace() && tokenizer.peek() != PsmToken.EndOfScene) {
+        while (!tokenizer.peek().isWhitespace() && tokenizer.peek() != PsmTokenValue.EndOfScene) {
             val nextToken = tokenizer.consume()
-            text.append(nextToken.value)
+            text.append(nextToken.text)
 
             if (linger <= 0) {
-                if (nextToken == PsmToken.Comma) {
+                if (nextToken == PsmTokenValue.Comma) {
                     linger = 10
-                } else if (nextToken == PsmToken.FullStop) {
+                } else if (nextToken == PsmTokenValue.FullStop) {
                     linger = 20
                 }
             }
@@ -335,22 +335,22 @@ public class SceneBaker {
 
     }
 
-    private fun handle(token: PsmToken){
+    private fun handle(token: PsmTokenValue){
         when (token) {
-            is PsmToken.Newline -> {
+            is PsmTokenValue.Newline -> {
                 // newlines are ignored
             }
-            is PsmToken.Text -> {
+            is PsmTokenValue.Text -> {
                 handleTextualNode(token)
                 state.removeTemp()
             }
-            is PsmToken.Dollar -> {
+            is PsmTokenValue.Dollar -> {
                 handleDirective(temporary = false)
             }
-            is PsmToken.Sharp -> {
+            is PsmTokenValue.Sharp -> {
                 handleDirective(temporary = true)
             }
-            is PsmToken.Space -> {
+            is PsmTokenValue.Space -> {
                 // strip leading spaces
                 if (this.lineLength > 0) {
                     this.lineLength += 1
@@ -376,11 +376,16 @@ public class SceneBaker {
 
         while (true) {
             val token = tokenizer.consume()
-            if (token == PsmToken.EndOfScene) break
+            if (token == PsmTokenValue.EndOfScene) break
             try {
                 handle(token)
             } catch (e: Exception) {
-                throw SS76EngineInternalError("Failed to handle token '$token'!", e)
+                val previous = this.currentNodes.lastOrNull()
+                val previousBack = currentNodes.getOrNull(currentNodes.size - 2)
+
+                throw SS76EngineInternalError(
+                    "Failed to handle token '$token'!\nPrevious nodes: [${previousBack?.text}, ${previous?.text}]", e
+                )
             }
         }
 

@@ -27,7 +27,7 @@ public class PsmTokenizer {
     private companion object;
 
     private val macros = mutableMapOf<String, KFunction<String>>()
-    private val tokens = ArrayDeque<PsmToken>()
+    private val tokens = ArrayDeque<PsmTokenValue>()
     private var lastText = CharArray(0)
 
     private var textCursor: Int = 0
@@ -89,11 +89,11 @@ public class PsmTokenizer {
         return lastText[textCursor++]
     }
 
-    private fun selectToken(char: Char): PsmToken {
+    private fun selectToken(char: Char): PsmTokenValue {
         return when (char) {
-            ',' -> PsmToken.Comma
-            '=' -> PsmToken.Equals
-            ']' -> PsmToken.RightBracket
+            ',' -> PsmTokenValue.Comma
+            '=' -> PsmTokenValue.Equals
+            ']' -> PsmTokenValue.RightBracket
             else -> error("illegal character $char")
         }
     }
@@ -105,7 +105,7 @@ public class PsmTokenizer {
         // todo: this feels like a gross misuse of peek/consume?
         while (true) {
             if (Character.isSpaceChar(next) || next == '\n') {
-                val token = PsmToken.Text(word.toString())
+                val token = PsmTokenValue.Text(word.toString())
                 tokens.add(token)
 
                 break
@@ -114,15 +114,15 @@ public class PsmTokenizer {
                 consumeChar()
 
                 if (isCharEof()) {
-                    val token = PsmToken.Text(word.toString())
+                    val token = PsmTokenValue.Text(word.toString())
                     tokens.add(token)
-                    tokens.add(PsmToken.EndOfScene)
+                    tokens.add(PsmTokenValue.EndOfScene)
                     break
                 } else {
                     next = peekChar()
                 }
             } else {
-                val token = PsmToken.Text(word.toString())
+                val token = PsmTokenValue.Text(word.toString())
                 tokens.add(token)
                 tokens.add(selectToken(next))
                 consumeChar()
@@ -144,44 +144,44 @@ public class PsmTokenizer {
         while (!isCharEof()) {
             when (peekChar()) {
                 '$' -> {
-                    tokens.add(PsmToken.Dollar)
+                    tokens.add(PsmTokenValue.Dollar)
                     consumeChar()
                 }
 
                 '#' -> {
-                    tokens.add(PsmToken.Sharp)
+                    tokens.add(PsmTokenValue.Sharp)
                     consumeChar()
                 }
 
                 '[' -> {
-                    tokens.add(PsmToken.LeftBracket)
+                    tokens.add(PsmTokenValue.LeftBracket)
                     consumeChar()
                 }
 
                 ']' -> {
-                    tokens.add(PsmToken.RightBracket)
+                    tokens.add(PsmTokenValue.RightBracket)
                     consumeChar()
                 }
 
                 ',' -> {
-                    tokens.add(PsmToken.Comma)
+                    tokens.add(PsmTokenValue.Comma)
                     consumeChar()
                 }
 
                 '=' -> {
-                    tokens.add(PsmToken.Equals)
+                    tokens.add(PsmTokenValue.Equals)
                     consumeChar()
                 }
 
                 '\n' -> {
-                    tokens.add(PsmToken.Newline)
+                    tokens.add(PsmTokenValue.Newline)
                     consumeChar()
                 }
                 // extra spaces are collapsed, leading/trailing ones are stripped
                 // so spaces are only used inbetween words.
                 ' ' -> {
-                    if (tokens.lastOrNull() != PsmToken.Space) {
-                        tokens.addLast(PsmToken.Space)
+                    if (tokens.lastOrNull() != PsmTokenValue.Space) {
+                        tokens.addLast(PsmTokenValue.Space)
                     }
                     consumeChar()
                 }
@@ -197,26 +197,26 @@ public class PsmTokenizer {
             }
         }
 
-        if (this.tokens.lastOrNull() != PsmToken.EndOfScene) {
-            tokens.add(PsmToken.EndOfScene)
+        if (this.tokens.lastOrNull() != PsmTokenValue.EndOfScene) {
+            tokens.add(PsmTokenValue.EndOfScene)
         }
     }
 
     /**
      * Peeks the next token.
      */
-    public fun peek(): PsmToken {
+    public fun peek(): PsmTokenValue {
         return tokens.first()
     }
 
     /**
      * Consumes the next token.
      */
-    public fun consume(): PsmToken {
+    public fun consume(): PsmTokenValue {
         return tokens.removeFirst()
     }
 
-    public fun consumeIgnoringSpaces(): PsmToken {
+    public fun consumeIgnoringSpaces(): PsmTokenValue {
         while (true) {
             val token = consume()
             if (token.isWhitespace()) continue
@@ -232,7 +232,7 @@ public class PsmTokenizer {
 internal fun PsmTokenizer.print() {
     while (!isEof()) {
         val next = consume()
-        if (next is PsmToken.Newline) {
+        if (next is PsmTokenValue.Newline) {
             println(next)
         } else {
             print("$next ")
