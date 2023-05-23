@@ -6,6 +6,8 @@
 
 package tf.veriny.ss76
 
+import tf.veriny.ss76.engine.EngineAssetManager
+
 /**
  * Contains the settings to load the engine with.
  */
@@ -19,6 +21,15 @@ public data class SS76Settings(
      * A function to be called during engine creation that will set up the engine state.
      */
     public val initialiser: (EngineState) -> Unit,
+
+    /**
+     * A function to be called during early engine initialisation that adds additional asset
+     * loaders.
+     *
+     * You must use this function, as all game assets will be loaded before
+     * [SS76Settings.initialiser] is called.
+     */
+    public val assetAdditions: (EngineAssetManager) -> Unit = {},
 
     /**
      * The title text for the newly created window.

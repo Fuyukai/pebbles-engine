@@ -149,6 +149,8 @@ public class EngineState(
             }
             println("All fonts generated in $fontGenTime.")
 
+            settings.assetAdditions(assets)
+
             val loadTime = measureTime { assets.autoload() }
             println("Auto-loaded all assets in $loadTime.")
 
