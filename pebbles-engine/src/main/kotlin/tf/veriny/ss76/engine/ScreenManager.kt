@@ -6,6 +6,8 @@
 
 package tf.veriny.ss76.engine
 
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Cursor
 import tf.veriny.ss76.EngineState
 import tf.veriny.ss76.engine.screen.DummyScreen
 import tf.veriny.ss76.engine.screen.ErrorScreen
@@ -47,6 +49,8 @@ public class ScreenManager(private val state: EngineState) {
     public fun changeScreen(screen: Screen, dispose: Boolean = true) {
         val oldScreen = this.currentScreen
         state.input.removeProcessor(oldScreen)
+
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow)
 
         if (dispose) {
             oldScreen.dispose()
