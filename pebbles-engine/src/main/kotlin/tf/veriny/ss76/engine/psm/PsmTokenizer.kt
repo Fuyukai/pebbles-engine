@@ -7,7 +7,6 @@
 package tf.veriny.ss76.engine.psm
 
 import java.util.regex.Pattern
-import kotlin.reflect.KFunction
 
 // XXX: this just does NOT work for some insane reason!
 private val MACRO_REGEX =
@@ -26,7 +25,7 @@ private val MACRO_PATTERN = Pattern.compile(
 public class PsmTokenizer {
     private companion object;
 
-    private val macros = mutableMapOf<String, KFunction<String>>()
+    private val macros = mutableMapOf<String, PsmMacro>()
     private val tokens = ArrayDeque<PsmTokenValue>()
     private var lastText = CharArray(0)
 
@@ -35,23 +34,18 @@ public class PsmTokenizer {
     /**
      * Adds a new simple macro expansion function.
      */
-    public fun addMacro(vararg key: String, fn: KFunction<String>) {
-        check(fn.parameters.all { it.type.classifier == String::class }) {
-            "Macro functions must take all string arguments"
-        }
-
+    public fun addMacro(vararg key: String, fn: PsmMacro) {
         for (k in key) macros[k] = fn
     }
 
     // built-in macros
-    internal fun macroDialogue(name: String): String {
-        val replacedName = name.replace('_', ' ')
-
-        return "$replacedName -- $[nl=1, left-margin=6]"
-    }
-
     init {
-        addMacro("dialogue", "dl", fn = ::macroDialogue)
+        addMacro("dialogue", "dl") { names ->
+            val name = names.first()
+            val replacedName = name.replace('_', ' ')
+
+            "$replacedName -- $[nl=1, left-margin=6]"
+        }
     }
 
     /**
@@ -73,7 +67,7 @@ public class PsmTokenizer {
             val name = matcher.group(groups["name"]!!)
             val args = matcher.group(groups["args"]!!).split(",").map { it.trim() }
             val fn = macros[name] ?: error("Unknown macro '$name'")
-            val result = fn.call(*args.toTypedArray())
+            val result = fn(*args.toTypedArray())
             built.append(result)
         }
 
