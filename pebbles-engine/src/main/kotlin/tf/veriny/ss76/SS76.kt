@@ -11,7 +11,6 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
 import com.badlogic.gdx.graphics.FPSLogger
 import ktx.app.KtxApplicationAdapter
-import org.lwjgl.glfw.GLFW
 import tf.veriny.ss76.engine.PreferencesManager
 import tf.veriny.ss76.engine.screen.ErrorScreen
 import tf.veriny.ss76.engine.util.EktFiles
@@ -19,7 +18,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
 /**
- * Main game object. Don't touch this directly.
+ * Dummy [KtxApplicationAdapter] implementation that simply passes everything
  */
 @OptIn(ExperimentalTime::class)
 public class SS76(
@@ -30,9 +29,7 @@ public class SS76(
             System.getProperty("ss76.demo", "false").toBooleanStrict()
 
         public fun start(settings: SS76Settings) {
-            GLFW.glfwInit()
-            val monitor = GLFW.glfwGetPrimaryMonitor()
-            val res = GLFW.glfwGetVideoMode(monitor)!!
+            val res = Lwjgl3ApplicationConfiguration.getDisplayMode()
 
             val config = Lwjgl3ApplicationConfiguration().apply {
                 setTitle(settings.windowTitle)
@@ -43,11 +40,11 @@ public class SS76(
                     setWindowedMode(width, height)
                 } else {
                     when {
-                        res.height() <= 960 -> {
+                        res.height <= 960 -> {
                             setWindowedMode(800, 600)
                         }
 
-                        res.height() <= 1080 -> {
+                        res.height <= 1080 -> {
                             setWindowedMode(1280, 960)
                         }
 
@@ -116,6 +113,4 @@ public class SS76(
 
         state.render()
     }
-
-
 }
