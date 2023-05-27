@@ -80,11 +80,12 @@ public class SceneManager(internal val state: EngineState) : Saveable {
     }
 
     /**
-     * Activates a new scene. This does not manipulate the stack.
+     * Activates a new scene, pushing this scene onto the top of the scene stack.
      */
     private fun activateScene(state: SceneState) {
         println("activating ${state.definition.sceneId}")
         seenScenes.add(state.definition.sceneId)
+        sceneStack.addLast(state)
 
         if (state.definition.modifiers.nonRenderable) {
             // skip creating a screen
@@ -98,9 +99,8 @@ public class SceneManager(internal val state: EngineState) : Saveable {
             return
         }
 
-        val forceNvl = System.getProperty("disable-adv-renderers", "false").toBooleanStrict()
         val advMode = state.definition.createAdvRenderer()
-        if (!forceNvl && advMode != null) {
+        if (advMode != null) {
             val screen = this.state.screenManager.currentScreen
             TODO("reimplement ADV mode")
             /*if (screen !is ADVScreen || !screen.isAlreadyRendering(advMode)) {
@@ -142,8 +142,7 @@ public class SceneManager(internal val state: EngineState) : Saveable {
      */
     public fun pushScene(id: String) {
         previousScene = sceneStack.lastOrNull()
-        val scene = loadAndActivateScene(id)
-        sceneStack.addLast(scene)
+        loadAndActivateScene(id)
     }
 
     /**
@@ -151,8 +150,7 @@ public class SceneManager(internal val state: EngineState) : Saveable {
      */
     public fun swapScene(id: String) {
         previousScene = sceneStack.removeLastOrNull()
-        val scene = loadAndActivateScene(id)
-        sceneStack.addLast(scene)
+        loadAndActivateScene(id)
     }
 
     /**
@@ -163,7 +161,6 @@ public class SceneManager(internal val state: EngineState) : Saveable {
         val id = scene.definition.sceneId
         val newScene = loadAndActivateScene(id, force = true)
         newScene.timer = scene.timer
-        sceneStack.addLast(newScene)
     }
 
     /**
