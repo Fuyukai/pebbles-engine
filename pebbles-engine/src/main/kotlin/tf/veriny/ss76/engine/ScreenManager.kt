@@ -8,6 +8,8 @@ package tf.veriny.ss76.engine
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Cursor
+import ktx.assets.dispose
+import ktx.assets.disposeSafely
 import tf.veriny.ss76.EngineState
 import tf.veriny.ss76.engine.screen.DummyScreen
 import tf.veriny.ss76.engine.screen.ErrorScreen
@@ -30,7 +32,12 @@ public class ScreenManager(private val state: EngineState) {
 
     /** Changes to the error screen. */
     public fun error(e: Throwable) {
-        changeScreen(ErrorScreen(state, e))
+        val oldScreen = this.currentScreen
+        oldScreen.dispose { e.addSuppressed(it) }
+
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.NotAllowed)
+
+        currentScreen = ErrorScreen(state, e)
     }
 
     public fun fadeIn(newScreen: Screen) {

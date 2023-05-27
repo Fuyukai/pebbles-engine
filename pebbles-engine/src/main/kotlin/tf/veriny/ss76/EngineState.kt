@@ -68,6 +68,8 @@ public class EngineState(
 
     public val musicManager: MusicManager = MusicManager(this)
 
+    private var hasErrored = false
+
     init {
         yamlLoader.apply {
             registerKotlinModule()
@@ -106,6 +108,13 @@ public class EngineState(
                 }
                 // reserved
                 Input.Keys.F5 -> {}
+                Input.Keys.F6 -> {}
+                Input.Keys.F7 -> {}
+                Input.Keys.F8 -> {}
+                Input.Keys.F9 -> {}
+                Input.Keys.F10 -> {
+                    throw SS76EngineInternalError("uh oh!")
+                }
                 else -> return super.keyDown(keycode)
             }
 
@@ -134,6 +143,22 @@ public class EngineState(
         } else {
             sceneManager.pushScene(scene)
         }*/
+    }
+
+    /**
+     * Handles an internal SS76 error.
+     */
+    internal fun handleError(error: Exception) {
+        if (hasErrored) {
+            val err = Throwable("Already hit an error, killing ourselves")
+            err.addSuppressed(error)
+            throw err
+        }
+
+        hasErrored = true
+
+        input.clear()
+        screenManager.error(error)
     }
 
     /**
@@ -181,9 +206,13 @@ public class EngineState(
      * Renders the current screen.
      */
     internal fun render() {
-        screenManager.currentScreen.render(Gdx.graphics.deltaTime)
-        if ((SS76.IS_DEMO || isDebugMode) && screenManager.currentScreen !is ErrorScreen) {
-            demoRenderer.render()
+        try {
+            screenManager.currentScreen.render(Gdx.graphics.deltaTime)
+            if ((SS76.IS_DEMO || isDebugMode) && screenManager.currentScreen !is ErrorScreen) {
+                demoRenderer.render()
+            }
+        } catch (e: Exception) {
+            handleError(e)
         }
 
         globalTimer++

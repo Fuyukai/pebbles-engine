@@ -17,11 +17,12 @@ public class SafeMultiplexer(
     private val state: EngineState,
     vararg processors: InputProcessor
 ) : InputMultiplexer(*processors) {
+
     override fun keyDown(keycode: Int): Boolean {
         return try {
             super.keyDown(keycode)
         } catch (e: Exception) {
-            state.screenManager.error(e)
+            state.handleError(e)
             false
         }
     }
@@ -30,7 +31,7 @@ public class SafeMultiplexer(
         return try {
             super.keyTyped(character)
         } catch (e: Exception) {
-            state.screenManager.error(e)
+            state.handleError(e)
             false
         }
     }
@@ -39,7 +40,7 @@ public class SafeMultiplexer(
         return try {
             super.keyUp(keycode)
         } catch (e: Exception) {
-            state.screenManager.error(e)
+            state.handleError(e)
             false
         }
     }
@@ -48,7 +49,7 @@ public class SafeMultiplexer(
         return try {
             super.mouseMoved(screenX, screenY)
         } catch (e: Exception) {
-            state.screenManager.error(e)
+            state.handleError(e)
             false
         }
     }
@@ -57,7 +58,7 @@ public class SafeMultiplexer(
         return try {
             super.touchDown(screenX, screenY, pointer, button)
         } catch (e: Exception) {
-            state.screenManager.error(e)
+            state.handleError(e)
             false
         }
     }
@@ -66,7 +67,7 @@ public class SafeMultiplexer(
         return try {
             super.touchDragged(screenX, screenY, pointer)
         } catch (e: Exception) {
-            state.screenManager.error(e)
+            state.handleError(e)
             false
         }
     }
@@ -75,7 +76,7 @@ public class SafeMultiplexer(
         return try {
             super.touchUp(screenX, screenY, pointer, button)
         } catch (e: Exception) {
-            state.screenManager.error(e)
+            state.handleError(e)
             false
         }
     }
@@ -84,7 +85,7 @@ public class SafeMultiplexer(
         return try {
             super.scrolled(amountX, amountY)
         } catch (e: Exception) {
-            state.screenManager.error(e)
+            state.handleError(e)
             false
         }
     }

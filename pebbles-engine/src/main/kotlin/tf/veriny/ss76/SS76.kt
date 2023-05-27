@@ -10,8 +10,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
 import com.badlogic.gdx.graphics.FPSLogger
-import com.badlogic.gdx.utils.PerformanceCounter
-import com.badlogic.gdx.utils.PerformanceCounters
 import ktx.app.KtxApplicationAdapter
 import org.lwjgl.glfw.GLFW
 import tf.veriny.ss76.engine.PreferencesManager
@@ -72,7 +70,7 @@ public class SS76(
     }
 
     private lateinit var state: EngineState
-    private var errorScreen: ErrorScreen? = null
+    private var loadingErrorScreen: ErrorScreen? = null
     private var renderTime = 0L
 
     override fun create() {
@@ -82,7 +80,7 @@ public class SS76(
             createImpl()
         } catch (e: Exception) {
             val error = ErrorScreen(null, e)
-            errorScreen = error
+            loadingErrorScreen = error
         }
     }
 
@@ -111,20 +109,12 @@ public class SS76(
     }
 
     override fun render() {
-        val err = errorScreen
+        val err = loadingErrorScreen
         if (err != null) {
             return err.render(Gdx.graphics.deltaTime)
         }
 
-        try {
-            if (state.isDebugMode) {
-                debugRender()
-            } else {
-                state.render()
-            }
-        } catch (e: Exception) {
-            state.screenManager.changeScreen(ErrorScreen(state, e))
-        }
+        state.render()
     }
 
 
