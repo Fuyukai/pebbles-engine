@@ -14,6 +14,7 @@ import ktx.app.KtxApplicationAdapter
 import tf.veriny.ss76.engine.PreferencesManager
 import tf.veriny.ss76.engine.screen.ErrorScreen
 import tf.veriny.ss76.engine.util.EktFiles
+import tf.veriny.ss76.engine.util.EktLogger
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
@@ -72,6 +73,7 @@ public class SS76(
 
     override fun create() {
         Gdx.files = EktFiles
+        Gdx.app.applicationLogger = EktLogger
 
         try {
             createImpl()
