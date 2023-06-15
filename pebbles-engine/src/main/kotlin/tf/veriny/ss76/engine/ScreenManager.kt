@@ -9,7 +9,6 @@ package tf.veriny.ss76.engine
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Cursor
 import ktx.assets.dispose
-import ktx.assets.disposeSafely
 import tf.veriny.ss76.EngineState
 import tf.veriny.ss76.engine.screen.DummyScreen
 import tf.veriny.ss76.engine.screen.ErrorScreen
@@ -19,7 +18,7 @@ import tf.veriny.ss76.engine.screen.Screen
 /**
  * Handles switching out SS76 screens.
  */
-public class ScreenManager(private val state: EngineState) {
+public class ScreenManager(internal val state: EngineState) {
     public companion object {
         public val SKIP_FADE_INS: Boolean = System.getProperty("ss76.skip-fadein", "false").toBooleanStrict()
     }
@@ -66,4 +65,14 @@ public class ScreenManager(private val state: EngineState) {
         currentScreen = screen
         state.input.addProcessor(currentScreen)
     }
+}
+
+/**
+ * Changes the current screen and clears the scene manager scene stack.
+ *
+ * For usage with technical scenes that need to change screens.
+ */
+public fun ScreenManager.changeScreenAndClearScenes(screen: Screen) {
+    state.sceneManager.clear()
+    changeScreen(screen)
 }

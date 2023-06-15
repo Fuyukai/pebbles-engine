@@ -170,7 +170,8 @@ public class SceneManager(internal val state: EngineState) : Saveable {
         val tos = sceneStack.removeLast()
         previousScene = tos
 
-        val newTos = sceneStack.last()
+        val newTos = sceneStack.lastOrNull()
+            ?: throw SS76EngineInternalError("attempted to exit last scene!")
         activateScene(newTos)
     }
 
@@ -208,5 +209,13 @@ public class SceneManager(internal val state: EngineState) : Saveable {
     // there's no implicit load order dependency on the event flag manager.
     override fun postLoad() {
         for (id in loadedIds) pushScene(id)
+    }
+
+    /**
+     * Clears the current scene stack.
+     */
+    internal fun clear() {
+        sceneStack.clear()
+        previousScene = null
     }
 }
