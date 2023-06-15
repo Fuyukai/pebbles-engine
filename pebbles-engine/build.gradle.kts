@@ -1,7 +1,4 @@
 import com.gorylenko.GitPropertiesPluginExtension
-import org.lwjgl.Lwjgl
-import org.lwjgl.Release
-import org.lwjgl.lwjgl
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
@@ -14,7 +11,7 @@ version = "0.8.3"
 
 // can't be private due to insane inscrutible gradle bugs
 @Suppress("PropertyName")
-val KTX_VERSION = "1.11.0-rc5"
+val KTX_VERSION = "1.11.0-rc6"
 @Suppress("PropertyName")
 val GDX_VERSION = "1.11.0"
 
@@ -41,10 +38,10 @@ dependencies {
     api("dev.dirs:directories:26")
     api("com.squareup.okio:okio:3.3.0")
 
-    api("com.fasterxml.jackson.core:jackson-core:2.15.0")
-    api("com.fasterxml.jackson.core:jackson-databind:2.15.0")
-    api("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.0")
-    api("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.0")
+    api("com.fasterxml.jackson.core:jackson-core:2.15.2")
+    api("com.fasterxml.jackson.core:jackson-databind:2.15.2")
+    api("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
+    api("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.2")
 
     implementation("org.apache.logging.log4j:log4j-api:2.20.0")
 }
