@@ -13,8 +13,8 @@ import tf.veriny.ss76.engine.util.NAMED_COLOURS
  * Wraps the data of a single font manifest.
  */
 public data class FontManifest(
-    @JsonDeserialize(keyAs = String::class, contentAs = FontEntry::class)
-    public val fonts: Map<String, FontEntry>
+    @JsonDeserialize(keyAs = String::class)
+    public val fonts: Map<String, List<FontEntry>>
 ) {
     public data class FontEntry(
         /** The path on the classpath to the font. */

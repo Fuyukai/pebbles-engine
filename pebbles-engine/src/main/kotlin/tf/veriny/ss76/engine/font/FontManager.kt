@@ -24,11 +24,11 @@ private const val CHARACTERS = """☺☻♥♦♣♠•◘○◙♂♀♪♫☼�
  * Manages fonts and generating them.
  */
 public class FontManager(private val state: EngineState) {
-    private val fonts = mutableMapOf<String, Font>()
+    private val fonts = mutableMapOf<String, FontList>()
 
     // convenience properties
-    public val defaultFont: Font get() = fonts["default"]!!
-    public val errorFont: Font get() = fonts["error"] ?: defaultFont
+    public val defaultFont: Font get() = fonts["default"]!!.getCurrent()
+    public val errorFont: Font get() = fonts["error"]?.getCurrent() ?: defaultFont
 
     private fun getFontManifest(): FontManifest {
         var path = EktFiles.RESOLVER.getPath("engine/font-manifest.yaml")
@@ -78,19 +78,22 @@ public class FontManager(private val state: EngineState) {
      */
     public fun generateAllFonts() {
         val manifest = getFontManifest()
-        for ((name, entry) in manifest.fonts) {
-            val generated = generateFont(name, entry)
-            fonts[name] = generated
+        for ((name, entries) in manifest.fonts) {
+            val fl = mutableListOf<Font>()
+            for (entry in entries) {
+                val generated = generateFont(name, entry)
+                fl.add(generated)
+            }
+
+            fonts[name] = FontList(fl)
         }
     }
 
-    /** Gets a list of all installed fonts. */
-    public fun getAllFonts(): List<Font> {
-        return fonts.values.toList()
-    }
+    /** Gets the font list for a font name, or null if it doesn't exist. */
+    public fun getFontList(name: String): FontList? = fonts[name]
 
     /** Gets a single font, or null if it doesn't exist. */
-    public fun getFontOrNull(name: String): Font? = fonts[name]
+    public fun getFontOrNull(name: String): Font? = fonts[name]?.getCurrent()
 
     /** Gets a single font, throwing an error if it doesn't exist. */
     public fun getFont(name: String): Font = getFontOrNull(name) ?: error("No such font '$name'")

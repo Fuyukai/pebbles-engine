@@ -9,3 +9,4 @@ max_line_length = 100
 
 [*.{psm,psmf}]
 max_line_length = 70
+

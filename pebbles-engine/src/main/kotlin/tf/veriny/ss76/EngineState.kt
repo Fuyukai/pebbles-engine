@@ -101,14 +101,23 @@ public class EngineState(
                 }
 
                 Input.Keys.F3 -> {
+                    val shift = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)
+                    if (!shift) {
+                        fontManager.getFontList("default")!!.cycle()
+                    } else {
+                        fontManager.getFontList("alt")!!.cycle()
+                    }
 
+                    sceneManager.rebake()
                 }
                 Input.Keys.F4 -> {
                     EktFiles.RESOLVER.closeAllFilesystems()
                 }
-                // reserved
                 Input.Keys.F5 -> {}
-                Input.Keys.F6 -> {}
+                // reserved
+                Input.Keys.F6 -> {
+                    sceneManager.rebake()
+                }
                 Input.Keys.F7 -> {}
                 Input.Keys.F8 -> {}
                 Input.Keys.F9 -> {}

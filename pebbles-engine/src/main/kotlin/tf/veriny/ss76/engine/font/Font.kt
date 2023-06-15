@@ -13,6 +13,21 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
 
 /**
+ * The cyclable list of fonts.
+ */
+public class FontList(fonts: Collection<Font>) {
+    private val fonts = ArrayDeque(fonts)
+
+    public fun getCurrent(): Font {
+        return fonts.first()
+    }
+
+    public fun cycle() {
+        fonts.addLast(fonts.removeFirst())
+    }
+}
+
+/**
  * A single generated monospace font.
  */
 public class Font(
