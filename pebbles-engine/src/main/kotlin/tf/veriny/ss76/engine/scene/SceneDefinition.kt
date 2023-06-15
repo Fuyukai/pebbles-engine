@@ -43,7 +43,7 @@ public class SceneDefinition(
         put("page-next", NextPageButton)
         put("page-back", PrevPageButton)
 
-        put("record", VnButtonManager.GLOBAL_BACK_BUTTON)
+        put("back-button", VnButtonManager.GLOBAL_BACK_BUTTON)
         put("checkpoint", VnButtonManager.CHECKPOINT_BUTTON)
     }
 
