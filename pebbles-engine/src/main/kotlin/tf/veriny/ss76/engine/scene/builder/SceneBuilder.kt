@@ -15,7 +15,6 @@ import tf.veriny.ss76.engine.psm.PsmSceneFragment
 import tf.veriny.ss76.engine.psm.UnbakedScene
 import tf.veriny.ss76.engine.scene.OnLoadHandler
 import tf.veriny.ss76.engine.scene.SceneModifiers
-import tf.veriny.ss76.engine.scene.onLoad
 
 /**
  * Return type of [SceneBuilder.page].
@@ -127,12 +126,29 @@ public class SceneBuilder
      * Adds a new push-scene button (with the ID `ps-<sceneId>`) that sets the provided [flagId]
      * to [flagValue] on click.
      *
-     * This is only required if you are setting flags.
+     * This is only required if you are setting flags. Otherwise, buttons with the id
+     * ``ps-<sceneId>`` are automatically generated.
      */
     public fun addPushChangeButton(sceneId: String, flagId: String? = null, flagValue: Int = 0) {
         val buttonId = "cs-${sceneId}"
         val button = PushSceneButton(buttonId, sceneId, setFlag = flagId, eventValue = flagValue)
         addButton(button)
+    }
+
+    /**
+     * Adds a new button to this scene.
+     */
+    public inline fun button(
+        id: String, linkedId: String? = null,
+        crossinline action: (EngineState) -> Unit
+    ): Button {
+        return object : Button {
+            override val name: String get() = id
+            override val linkedId: String? get() = linkedId
+            override fun run(state: EngineState) {
+                return action.invoke(state)
+            }
+        }
     }
 
     internal fun get(): UnbakedScene {
