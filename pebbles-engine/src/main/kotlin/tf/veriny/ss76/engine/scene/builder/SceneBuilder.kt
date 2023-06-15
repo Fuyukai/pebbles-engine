@@ -148,7 +148,7 @@ public class SceneBuilder
             override fun run(state: EngineState) {
                 return action.invoke(state)
             }
-        }
+        }.also { addButton(it) }
     }
 
     internal fun get(): UnbakedScene {

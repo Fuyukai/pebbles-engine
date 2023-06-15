@@ -86,17 +86,3 @@ public object NextPageButton : Button {
         state.sceneManager.currentScene.pageNext()
     }
 }
-
-
-/**
- * Creates a new button with the provided name, that performs [action] on click.
- */
-public inline fun button(name: String, crossinline action: (EngineState) -> Unit): Button {
-    return object : Button {
-        override val name: String get() = name
-
-        override fun run(state: EngineState) {
-            action(state)
-        }
-    }
-}
