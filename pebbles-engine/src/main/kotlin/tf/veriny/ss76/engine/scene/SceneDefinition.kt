@@ -12,9 +12,6 @@ import tf.veriny.ss76.engine.PrevPageButton
 import tf.veriny.ss76.engine.VnButtonManager
 import tf.veriny.ss76.engine.adv.ADVSubRenderer
 
-public typealias onLoad = (SceneState) -> Unit
-
-
 /**
  * A scene definition that lazily creates new scene data.
  */
