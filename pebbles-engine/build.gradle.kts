@@ -31,7 +31,10 @@ dependencies {
 
     api("com.squidpony:squidlib-util:3.0.6")
 
-    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$GDX_VERSION")
+    implementation("com.badlogicgames.gdx:gdx-backend-lwjgl3:$GDX_VERSION") {
+        exclude(group = "org.lwjgl")
+    }
+
     implementation("com.badlogicgames.gdx:gdx-platform:$GDX_VERSION:natives-desktop")
     implementation("com.badlogicgames.gdx:gdx-freetype-platform:$GDX_VERSION:natives-desktop")
 
@@ -44,20 +47,6 @@ dependencies {
     api("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.0")
 
     implementation("org.apache.logging.log4j:log4j-api:2.20.0")
-
-    // override libgdx's lwjgl3, at least until 3.3.2 is transitive via gdx-backend-lwjgl3
-    // 3.3.1 doesn't work under intellij debugger on java 19+ due to JNI changes. 3.3.2 fixes this.
-    lwjgl {
-        version = Release.`3_3_2`
-        implementation(
-            Lwjgl.Module.glfw,
-            Lwjgl.Module.openal,
-            Lwjgl.Module.jemalloc,
-            Lwjgl.Module.opengl,
-            Lwjgl.Module.stb,
-        )
-    }
-
 }
 
 configure<GitPropertiesPluginExtension> {
