@@ -26,9 +26,6 @@ public class SS76(
     private val settings: SS76Settings,
 ) : KtxApplicationAdapter {
     public companion object {
-        public val IS_DEMO: Boolean =
-            System.getProperty("ss76.demo", "false").toBooleanStrict()
-
         public fun start(settings: SS76Settings) {
             val res = Lwjgl3ApplicationConfiguration.getDisplayMode()
 

@@ -526,7 +526,7 @@ public class NVLRendererV3(
                 )
             }
 
-            if (state.engineState.isDebugMode) {
+            if (state.engineState.settings.isDeveloperMode) {
                 state.engineState.fontManager.defaultFont.draw(
                     batch,
                     "Scene ID: ${es.sceneManager.currentScene.definition.sceneId}",

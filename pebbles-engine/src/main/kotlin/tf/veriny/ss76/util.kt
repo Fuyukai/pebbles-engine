@@ -8,9 +8,12 @@
 
 package tf.veriny.ss76
 
+import com.badlogic.gdx.Input.Keys.V
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import java.lang.management.ManagementFactory
 import java.nio.charset.Charset
+import java.nio.file.Path
 import kotlin.random.Random
 import kotlin.reflect.KClass
 
@@ -45,6 +48,37 @@ public fun Iterable<Boolean>.all(): Boolean {
     }
 
     return true
+}
+
+// this performs some checks so that you can't boot in dev mode outside of the IDE.
+/**
+ * Checks if the engine is running in developer mode. Your main object should be provided as
+ * [usingKlass].
+ */
+public fun isDeveloperMode(usingKlass: KClass<*>? = null): Boolean {
+    if (!System.getProperty("ss76.developer-mode", "false").toBooleanStrict()) return false
+
+    // small number of heuristics available here.
+    // 1) check if the jar provided isn't inside a jar.
+    if (usingKlass != null && !isInsideJar(usingKlass)) return true
+
+    // 2) check classpath for gradle caches
+    val path = System.getProperty("java.class.path")
+    for (entry in path.split(':')) {
+        // running inside gradle, probably developer mode.
+        if (entry.contains(".gradle/caches")) return true
+    }
+
+    // 3) check jvm args for the idea_rt java agent.
+    val bean = ManagementFactory.getRuntimeMXBean()
+    val args = bean.inputArguments
+    for (arg in args) {
+        if (!arg.startsWith("-javaagent")) continue
+        // running using the intellij agent.
+        if (arg.contains("idea_rt.jar")) return true
+    }
+
+    return false
 }
 
 

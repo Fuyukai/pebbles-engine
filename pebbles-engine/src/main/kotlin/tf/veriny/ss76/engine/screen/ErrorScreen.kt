@@ -83,7 +83,7 @@ public class ErrorScreen(
                 return
             }
 
-            if (state.isDebugMode) {
+            if (state.settings.isDeveloperMode) {
                 val message = if (state.sceneManager.stackSize == 0) {
                     "Fatal error!"
                 } else {

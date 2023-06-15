@@ -17,7 +17,7 @@ import tf.veriny.ss76.use
 /**
  * Demo button at the top of the screen.
  */
-internal class OddCareRenderer {
+internal class OddCareRenderer(private val text: String = "DEMO") {
     private val demoFont: BitmapFont
     private val batch = SpriteBatch()
 
@@ -37,7 +37,7 @@ internal class OddCareRenderer {
     internal fun render() {
         if (timer.rem(90) > 30) {
             batch.use {
-                demoFont.draw(batch, "DEMO", 10f, Gdx.graphics.height - 10f)
+                demoFont.draw(batch, text, 10f, Gdx.graphics.height - 10f)
             }
         }
 

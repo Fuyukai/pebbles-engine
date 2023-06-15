@@ -61,7 +61,7 @@ public data class SS76Settings(
     /**
      * If True, then additional debugging features will be enabled.
      */
-    public val isDebugMode: Boolean = false,
+    public val isDeveloperMode: Boolean = false,
 
     /**
      * The ID of the scene to push after engine initialisation. If this is null, then the default

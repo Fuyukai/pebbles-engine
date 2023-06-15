@@ -33,10 +33,9 @@ public class EngineState(
     public val settings: SS76Settings,
     public val preferencesManager: PreferencesManager,
 ) {
-    private val demoRenderer = OddCareRenderer()
-
-    /** Used to conditionally enable or disable debugging content. */
-    public var isDebugMode: Boolean = settings.isDebugMode
+    private val oddCareRenderer: OddCareRenderer? =
+        if (!settings.isDeveloperMode) null
+        else OddCareRenderer("DEVELOPER MODE")
 
     /** The global frame timer. Increments monotonically by one every frame. */
     public var globalTimer: Long = 0L
@@ -84,20 +83,19 @@ public class EngineState(
     /** The input multiplexer, used for input. */
     public val input: InputMultiplexer = SafeMultiplexer(this, object : KtxInputAdapter {
         override fun keyDown(keycode: Int): Boolean {
+            if (!settings.isDeveloperMode) return false
+
             // helper functionality that overrides all sub-screens.
+            // all other keys are reserved
             when (keycode) {
                 Input.Keys.F1 -> {
-                    if (isDebugMode) {
-                        openDataScene()
-                    }
+                    openDataScene()
                 }
 
                 Input.Keys.F2 -> {
                     // push demo UI
-                    if (SS76.IS_DEMO || isDebugMode) {
-                        repeat(sceneManager.stackSize - 1) { sceneManager.exitScene() }
-                        sceneManager.swapScene("demo-meta-menu")
-                    }
+                    repeat(sceneManager.stackSize - 1) { sceneManager.exitScene() }
+                    sceneManager.swapScene("demo-meta-menu")
                 }
 
                 Input.Keys.F3 -> {
@@ -114,7 +112,6 @@ public class EngineState(
                     EktFiles.RESOLVER.closeAllFilesystems()
                 }
                 Input.Keys.F5 -> {}
-                // reserved
                 Input.Keys.F6 -> {
                     sceneManager.rebake()
                 }
@@ -204,7 +201,7 @@ public class EngineState(
 
         var scene = settings.startupScene ?: System.getProperty("ss76.scene")
         if (scene == null) {
-            scene = if (isDebugMode) "demo-meta-menu" else "main-menu"
+            scene = if (settings.isDeveloperMode) "demo-meta-menu" else "main-menu"
         }
 
         sceneManager.pushScene(scene)
@@ -217,8 +214,8 @@ public class EngineState(
     internal fun render() {
         try {
             screenManager.currentScreen.render(Gdx.graphics.deltaTime)
-            if ((SS76.IS_DEMO || isDebugMode) && screenManager.currentScreen !is ErrorScreen) {
-                demoRenderer.render()
+            if (screenManager.currentScreen !is ErrorScreen) {
+                oddCareRenderer?.render()
             }
         } catch (e: Exception) {
             handleError(e)
