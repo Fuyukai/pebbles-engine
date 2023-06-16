@@ -13,7 +13,7 @@ private val MACRO_REGEX =
     "%(?<name>\\w+)\\((?<args>\\s*\\w+\\s*(?:,\\s*\\w+\\s*)*)\\s*\\)%".toRegex()
 
 private val MACRO_PATTERN = Pattern.compile(
-    "%(?<name>\\w+)\\((?<args>\\s*\\w+\\s*(?:,\\s*\\w+\\s*)*)\\s*\\)%",
+    "%(?<name>\\w+)\\((?<args>\\s*.*\\s*(?:,\\s*.*+\\s*)*)\\s*\\)%",
     Pattern.MULTILINE
 )
 
