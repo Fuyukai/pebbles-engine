@@ -62,6 +62,9 @@ public class SceneBaker {
         addHandler("font") {
             PsmFont(it)
         }
+        addHandler("linger") {
+            PsmLingerFrames(it.toInt())
+        }
 
         addHandler("clrf", "nl", "newline") {
             handleNewline(it)
