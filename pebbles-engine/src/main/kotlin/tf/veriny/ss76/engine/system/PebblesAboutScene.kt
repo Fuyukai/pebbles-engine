@@ -9,6 +9,9 @@ package tf.veriny.ss76.engine.system
 import tf.veriny.ss76.EngineState
 import tf.veriny.ss76.SS76
 import tf.veriny.ss76.engine.Button
+import tf.veriny.ss76.engine.psm.nl
+import tf.veriny.ss76.engine.psm.nlline
+import tf.veriny.ss76.engine.psm.rline
 import tf.veriny.ss76.engine.scene.SceneManager
 import tf.veriny.ss76.engine.scene.register
 import java.awt.Desktop
@@ -52,19 +55,19 @@ internal fun SceneManager.registerAboutScene() {
                 return@page
             }
 
-            addRawFragment("""
-                #[@=green] Pebbles #[@=pink] Engine #[@=AFEEEE] ${gitProperties["git.build.version"]}
-                (Branch: $[@=sky,chomp=true] ${gitProperties["git.branch"]} $$) #[nl=2] 
-                
-                $[@=green] Git Commit: $$ ${gitProperties["git.commit.id"]} $[nl=1]
-                $[@=green] Git Commit Time: $$ ${gitProperties["git.commit.time"]} $[nl=1]
-                $[@=green] Git Commit Message: $$ $[left-margin=21] '${gitProperties["git.commit.message.short"]}' $$
-                $[nl=2]
-                
-                $[@=sky,left-margin=26] Baked with PSM 2.0 $$ $[nl=2]
-                
-                Powered by #[@=salmon,`=libgdx] LibGDX and #[@=salmon,`=lwjgl3] LWJGL3
-            """.trimIndent())
+            rline("#[@=green] Pebbles #[@=pink] Engine #[@=AFEEEE] ${gitProperties["git.build.version"]} ")
+            rline("(Branch: \$[@=sky,chomp=true] ${gitProperties["git.branch"]} \$\$)")
+            nl(2)
+
+            nlline("\$[@=green] Git Commit: \$\$ ${gitProperties["git.commit.id"]}")
+            nlline("\$[@=green] Git Commit Time: \$\$ ${gitProperties["git.commit.time"]}")
+            rline("\$[@=green] Git Commit Message: \$\$ \$[left-margin=21] '${gitProperties["git.commit.message.short"]}' \$\$")
+            nl(2)
+
+            nlline("\$[@=sky,left-margin=26] Baked with PSM 2.0 \$\$")
+            nl(2)
+
+            rline("Powered by #[@=salmon,`=libgdx] LibGDX and #[@=salmon,`=lwjgl3] LWJGL3")
         }
     }
 }

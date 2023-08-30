@@ -10,6 +10,7 @@ import tf.veriny.ss76.EngineState
 import tf.veriny.ss76.engine.Button
 import tf.veriny.ss76.engine.ChangeSceneButton
 import tf.veriny.ss76.engine.PushSceneButton
+import tf.veriny.ss76.engine.SS76EngineInternalError
 import tf.veriny.ss76.engine.scene.*
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
@@ -56,7 +57,11 @@ public class UnbakedScene(
             )
         }
 
-        return state.sceneManager.sceneBakery.bake(built.toString())
+        try {
+            return state.sceneManager.sceneBakery.bake(built.toString())
+        } catch (e: SS76EngineInternalError) {
+            throw SS76EngineInternalError("Failed to bake page:\n $built", e)
+        }
     }
 
     /**

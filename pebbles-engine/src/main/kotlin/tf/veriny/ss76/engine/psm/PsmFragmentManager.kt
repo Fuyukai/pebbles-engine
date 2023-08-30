@@ -17,6 +17,11 @@ private val REGEXP = "----- (.*)\\n".toRegex()
  * Handles loading PSM fragment bundles.
  */
 public class PsmFragmentManager(public val languageCode: String) {
+    public companion object {
+        /** A raw scene fragment for a single newline. */
+        public const val RAW_SINGLE_NEWLINE: String = " $[nl=] "
+    }
+
     private val fragments = mutableMapOf<String, PsmSceneFragment>()
 
     public operator fun get(id: String): PsmSceneFragment {
