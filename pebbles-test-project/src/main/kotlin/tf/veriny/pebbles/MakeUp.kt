@@ -9,7 +9,6 @@ package tf.veriny.pebbles
 import tf.veriny.ss76.*
 
 public object MakeUp {
-
     @JvmStatic
     public fun main(args: Array<String>) {
         val settings = SS76Settings(

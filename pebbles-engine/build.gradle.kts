@@ -11,9 +11,9 @@ version = "0.8.3"
 
 // can't be private due to insane inscrutible gradle bugs
 @Suppress("PropertyName")
-val KTX_VERSION = "1.11.0-rc6"
+val KTX_VERSION = "1.12.0-rc1"
 @Suppress("PropertyName")
-val GDX_VERSION = "1.11.0"
+val GDX_VERSION = "1.12.0"
 
 
 dependencies {
@@ -36,7 +36,7 @@ dependencies {
     implementation("com.badlogicgames.gdx:gdx-freetype-platform:$GDX_VERSION:natives-desktop")
 
     api("dev.dirs:directories:26")
-    api("com.squareup.okio:okio:3.3.0")
+    api("com.squareup.okio:okio:3.5.0")
 
     api("com.fasterxml.jackson.core:jackson-core:2.15.2")
     api("com.fasterxml.jackson.core:jackson-databind:2.15.2")

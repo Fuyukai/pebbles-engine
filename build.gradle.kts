@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.jetbrains.kotlin.jvm").version("1.8.21").apply(false)
+    id("org.jetbrains.kotlin.jvm").version("1.9.10").apply(false)
     id("com.diffplug.spotless").version("6.18.0").apply(false)
     id("com.github.ben-manes.versions").version("0.46.0")
 }
@@ -59,7 +59,7 @@ subprojects {
                     "-Xassertions=always-enable",  // Forcibly enable assertions
                     "-Xlambdas=indy",  // Forcibly use invokedynamic for all lambdas.
                 )
-                jvmTarget = "19"
+                jvmTarget = "20"
                 languageVersion = "1.9"
             }
         }
@@ -68,7 +68,7 @@ subprojects {
             .forEach { it.group = "lint" }
 
         withType<JavaCompile> {
-            targetCompatibility = "19"
+            targetCompatibility = "20"
         }
     }
 }
