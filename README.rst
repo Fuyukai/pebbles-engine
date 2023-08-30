@@ -14,7 +14,9 @@ Add my maven:
 .. code-block:: kotlin
 
     repositories {
-        maven(url="https://maven.veriny.tf")
+        mavenCentral()
+
+        maven(url="https://maven.veriny.tf/releases")
     }
 
 Then add the library to your project:
