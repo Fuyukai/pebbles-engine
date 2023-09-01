@@ -271,8 +271,8 @@ public class SceneBaker {
         }
     }
 
-    private fun handleTextualNode(token: PsmTokenValue.Text) {
-        val text = StringBuilder(token.text)
+    private fun handleTextualNode(token: String) {
+        val text = StringBuilder(token)
         var linger = state.lingerFrames
         while (!tokenizer.peek().isWhitespace() && tokenizer.peek() != PsmTokenValue.EndOfScene) {
             val nextToken = tokenizer.consume()
@@ -343,8 +343,8 @@ public class SceneBaker {
             is PsmTokenValue.Newline -> {
                 // newlines are ignored
             }
-            is PsmTokenValue.Text -> {
-                handleTextualNode(token)
+            is PsmTokenValue.Text, is PsmTokenValue.Comma -> {
+                handleTextualNode(token.text)
                 state.removeTemp()
             }
             is PsmTokenValue.Dollar -> {
