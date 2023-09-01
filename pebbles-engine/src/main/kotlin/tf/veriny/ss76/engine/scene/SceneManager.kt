@@ -84,7 +84,6 @@ public class SceneManager(internal val state: EngineState) : Saveable {
      */
     private fun activateScene(state: SceneState) {
         println("activating ${state.definition.sceneId}")
-        seenScenes.add(state.definition.sceneId)
         sceneStack.addLast(state)
 
         if (state.definition.modifiers.nonRenderable) {
