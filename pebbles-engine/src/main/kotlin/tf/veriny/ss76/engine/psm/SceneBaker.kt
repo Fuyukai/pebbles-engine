@@ -93,7 +93,7 @@ public class SceneBaker {
             PsmEffect(effects)
         }
 
-        addHandler("link-colour") {
+        addHandler("link-colour", "lc", "%") {
             PsmColourButtonLink(it.toBooleanHandleBlank(true))
         }
         addHandler("`", "button") {
