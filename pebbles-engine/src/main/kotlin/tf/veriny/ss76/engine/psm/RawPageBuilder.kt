@@ -50,5 +50,5 @@ public fun PageBuilder.ps(scene: String, content: String, colour: String? = null
  * Adds a new dialogue-line using the dialogue macro.
  */
 public fun PageBuilder.dline(name: String, content: String) {
-    addRawFragment(" %dl(SOMEBODY)% $content $$ ")
+    addRawFragment(" %dl(${name})% $content $$ ")
 }
