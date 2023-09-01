@@ -77,4 +77,9 @@ public data class SceneModifiers(
      * The text at the top of the screen to draw.
      */
     public val topText: String? = null,
+
+    /**
+     * If true, the stylistic SS76 Glitchy Text Rendering is used.
+     */
+    public val glitchyTextRendering: Boolean = true,
 )

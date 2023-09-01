@@ -10,7 +10,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.*
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.utils.Disposable
@@ -375,6 +374,7 @@ public class NVLRendererV3(
                 val nextNode = nodes.getOrNull(index + 1)
                 try {
                     if (
+                        state.definition.modifiers.glitchyTextRendering &&
                         nextNode != null &&
                         node.startFrame < state.timer &&
                         node.endFrame > state.timer
