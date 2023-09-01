@@ -9,9 +9,7 @@ package tf.veriny.ss76.engine.system
 import tf.veriny.ss76.EngineState
 import tf.veriny.ss76.SS76
 import tf.veriny.ss76.engine.Button
-import tf.veriny.ss76.engine.psm.nl
-import tf.veriny.ss76.engine.psm.nlline
-import tf.veriny.ss76.engine.psm.rline
+import tf.veriny.ss76.engine.psm.rawScene
 import tf.veriny.ss76.engine.scene.SceneManager
 import tf.veriny.ss76.engine.scene.register
 import java.awt.Desktop
@@ -49,10 +47,10 @@ internal fun SceneManager.registerAboutScene() {
         addButton(OpenBrowserButton("libgdx", "https://libgdx.com/"))
         addButton(OpenBrowserButton("lwjgl3", "https://www.lwjgl.org/"))
 
-        page {
+        rawScene {
             if (gitProperties.isEmpty) {
-                addRawFragment("$[@=red] Uh oh!")
-                return@page
+                rline("$[@=red] Uh oh!")
+                return@rawScene
             }
 
             rline("#[@=green] Pebbles #[@=pink] Engine #[@=AFEEEE] ${gitProperties["git.build.version"]} ")
