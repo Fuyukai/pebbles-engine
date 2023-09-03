@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package tf.veriny.ss76.engine
+package tf.veriny.ss76.engine.saving
 
 import dev.dirs.BaseDirectories
 import okio.ByteString.Companion.toByteString
@@ -12,6 +12,9 @@ import okio.buffer
 import okio.sink
 import okio.source
 import tf.veriny.ss76.EngineState
+import tf.veriny.ss76.engine.SS76EngineInternalError
+import tf.veriny.ss76.engine.readPascalString
+import tf.veriny.ss76.engine.writePascalString
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -19,6 +22,8 @@ import java.nio.file.StandardOpenOption.*
 import java.nio.file.attribute.FileTime
 import kotlin.io.path.createDirectories
 import kotlin.io.path.getLastModifiedTime
+
+// also acts as a "store" of custom persistent state.
 
 // TODO: custom exceptions
 /**
@@ -49,6 +54,17 @@ public class SaveManager(
 
     // extra subsystems that need saving
     private val needsSaving: MutableMap<String, Saveable> = mutableMapOf()
+
+    internal fun getAllSubsystems(): Collection<Saveable> {
+        return needsSaving.values
+    }
+
+    /**
+     * Gets a saveable registered in this save manager.
+     */
+    public fun getSaveable(name: String): Saveable {
+        return needsSaving[name] ?: throw SS76EngineInternalError("No such saveable: $name")
+    }
 
     /**
      * Adds a new [saveable] to the items to be saved. This requires an ID, which will be used to

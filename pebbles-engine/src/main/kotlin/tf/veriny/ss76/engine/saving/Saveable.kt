@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package tf.veriny.ss76.engine
+package tf.veriny.ss76.engine.saving
 
 import okio.BufferedSink
 import okio.BufferedSource

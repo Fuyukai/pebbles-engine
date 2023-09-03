@@ -10,7 +10,7 @@ import okio.BufferedSink
 import okio.BufferedSource
 import tf.veriny.ss76.EngineState
 import tf.veriny.ss76.engine.SS76EngineInternalError
-import tf.veriny.ss76.engine.Saveable
+import tf.veriny.ss76.engine.saving.Saveable
 import tf.veriny.ss76.engine.nvl.NVLScreen
 import tf.veriny.ss76.engine.psm.SceneBaker
 import tf.veriny.ss76.engine.psm.UnbakedScene

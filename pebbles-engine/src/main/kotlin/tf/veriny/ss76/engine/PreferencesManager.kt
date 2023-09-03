@@ -7,14 +7,13 @@
 package tf.veriny.ss76.engine
 
 import tf.veriny.ss76.SS76Settings
+import tf.veriny.ss76.engine.saving.SaveManager
 import java.nio.file.StandardOpenOption
 import java.util.*
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.reader
 import kotlin.io.path.writer
-import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KProperty
 
 /**
  * Handles saving and loading certain global preferences.
@@ -27,7 +26,7 @@ public class PreferencesManager(private val settings: SS76Settings) {
         )
     }
 
-    private val prefsDir = SaveManager.BASE_DIR.resolve(settings.namespace).also { 
+    private val prefsDir = SaveManager.BASE_DIR.resolve(settings.namespace).also {
         it.createDirectories()
     }
     

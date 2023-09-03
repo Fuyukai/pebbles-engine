@@ -18,6 +18,7 @@ import tf.veriny.ss76.engine.*
 import tf.veriny.ss76.engine.font.FontManager
 import tf.veriny.ss76.engine.psm.PsmFragmentManager
 import tf.veriny.ss76.engine.renderer.OddCareRenderer
+import tf.veriny.ss76.engine.saving.SaveManager
 import tf.veriny.ss76.engine.scene.SceneManager
 import tf.veriny.ss76.engine.screen.ErrorScreen
 import tf.veriny.ss76.engine.system.CheckpointSceneManager

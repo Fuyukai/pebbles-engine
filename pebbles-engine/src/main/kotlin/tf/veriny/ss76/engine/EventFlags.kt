@@ -9,6 +9,7 @@ package tf.veriny.ss76.engine
 import okio.BufferedSink
 import okio.BufferedSource
 import tf.veriny.ss76.EngineState
+import tf.veriny.ss76.engine.saving.Saveable
 
 /**
  * Manages event flags. These are simple flags that can be set to a number.
