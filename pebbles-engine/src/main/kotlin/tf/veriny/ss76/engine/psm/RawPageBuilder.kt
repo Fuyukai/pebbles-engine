@@ -83,6 +83,11 @@ public class RawPageBuilder
         stringBuilder.append("%dl(${name})% $content $$")
     }
 
+    public fun backButton() {
+        ensureSpace()
+        stringBuilder.append("%back()%")
+    }
+
     override fun toString(): String {
         return this.stringBuilder.toString()
     }

@@ -46,6 +46,10 @@ public class PsmTokenizer {
 
             "$replacedName -- $[nl=1, left-margin=6]"
         }
+
+        addMacro("back", "bb") { _ ->
+            "$[`=back-button,@=green] << Back $$"
+        }
     }
 
     /**

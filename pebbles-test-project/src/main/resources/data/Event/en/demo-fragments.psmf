@@ -34,6 +34,8 @@ Named colour demonstration: #[nl=2]
 #[@=yellow] Yellow #[nl=1]
 #[@=black] Black #[nl=1]
 
+%back()%
+
 ----- demo.colours.2
 
 Of course, you can also do #[@=c27ba0] custom #[@=CAFEBA] colours
