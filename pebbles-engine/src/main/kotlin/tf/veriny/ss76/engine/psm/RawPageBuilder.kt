@@ -91,7 +91,7 @@ public class RawPageBuilder
 /**
  * Creates a new scene using a [RawPageBuilder].
  */
-public inline fun SceneBuilder.rawScene(crossinline block: RawPageBuilder.() -> Unit): PageIndex {
+public inline fun SceneBuilder.rawPage(crossinline block: RawPageBuilder.() -> Unit): PageIndex {
     return page {
         val realBuilder = RawPageBuilder(this)
         realBuilder.block()
