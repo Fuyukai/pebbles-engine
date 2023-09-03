@@ -65,5 +65,3 @@ public class SceneDefinition(
         return pages[page]
     }
 }
-
-

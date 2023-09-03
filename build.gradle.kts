@@ -41,7 +41,13 @@ subprojects {
     }
 
     configure<SpotlessExtension> {
+        encoding(Charsets.UTF_8)
+
         kotlin {
+            endWithNewline()
+            trimTrailingWhitespace()
+            indentWithSpaces(4)
+
             targetExclude("build/generated/**")
             licenseHeaderFile(project.file("LICENCE-HEADER"))
         }

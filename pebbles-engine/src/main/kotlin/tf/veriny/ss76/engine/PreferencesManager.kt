@@ -29,7 +29,7 @@ public class PreferencesManager(private val settings: SS76Settings) {
     private val prefsDir = SaveManager.BASE_DIR.resolve(settings.namespace).also {
         it.createDirectories()
     }
-    
+
     private val actualProperties = mutableMapOf<String, String>()
 
     // internal as this is only ever called during engine startup
