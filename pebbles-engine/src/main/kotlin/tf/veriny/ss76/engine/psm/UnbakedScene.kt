@@ -108,6 +108,8 @@ public class UnbakedScene(
                     break
                 }
             }
+
+            throw IllegalArgumentException("No such button: ${node.buttonId}")
         }
 
         val scene = SceneDefinition(
