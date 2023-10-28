@@ -89,7 +89,7 @@ public class SceneManager(internal val state: EngineState) : Saveable {
         if (state.definition.modifiers.nonRenderable) {
             // skip creating a screen
             state.definition.onLoad(state)
-            if (sceneStack.last() == state) {
+            if (this.state.screenManager.currentScreen is NVLScreen && sceneStack.last() == state) {
                 throw SS76EngineInternalError(
                     "Scene '${state.definition.sceneId} is marked as non-renderable, " +
                         "but failed to switch scene on load"

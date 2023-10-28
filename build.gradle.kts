@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.jetbrains.kotlin.jvm").version("1.9.10").apply(false)
+    id("org.jetbrains.kotlin.jvm").version("1.9.20-RC").apply(false)
     id("com.diffplug.spotless").version("6.18.0").apply(false)
     id("com.github.ben-manes.versions").version("0.46.0")
 }
