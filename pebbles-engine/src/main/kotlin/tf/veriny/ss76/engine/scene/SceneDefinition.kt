@@ -36,12 +36,17 @@ public class SceneDefinition(
 
     override val modifiers: SceneModifiers
 ) : VirtualNovelSceneDefinition {
-    public override val buttons: Map<String, Button> = originalButtons.toMutableMap().apply {
-        put("page-next", NextPageButton)
-        put("page-back", PrevPageButton)
+    public companion object {
+        public val GLOBAL_BUTTONS: Map<String, Button> = mutableMapOf(
+            "page-next" to NextPageButton,
+            "page-back" to PrevPageButton,
+            "back-button" to VnButtonManager.CHECKPOINT_BUTTON,
+            "checkpoint" to VnButtonManager.GLOBAL_BACK_BUTTON,
+        )
+    }
 
-        put("back-button", VnButtonManager.GLOBAL_BACK_BUTTON)
-        put("checkpoint", VnButtonManager.CHECKPOINT_BUTTON)
+    public override val buttons: Map<String, Button> = originalButtons.toMutableMap().also {
+        it.putAll(GLOBAL_BUTTONS)
     }
 
     /** If this definition has custom onLoad handlers. */

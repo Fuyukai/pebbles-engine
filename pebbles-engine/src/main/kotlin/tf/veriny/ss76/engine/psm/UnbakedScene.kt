@@ -97,7 +97,7 @@ public class UnbakedScene(
         for (node in bakeTime.value.flatten()) {
             if (node.buttonId.isNullOrBlank()) continue
             val buttonId = node.buttonId!!
-            if (buttonId in buttonMap) continue
+            if (buttonId in buttonMap || buttonId in SceneDefinition.GLOBAL_BUTTONS) continue
 
             var matched = false
 
