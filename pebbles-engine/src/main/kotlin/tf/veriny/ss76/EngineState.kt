@@ -84,17 +84,19 @@ public class EngineState(
     /** The input multiplexer, used for input. */
     public val input: InputMultiplexer = SafeMultiplexer(this, object : KtxInputAdapter {
         override fun keyDown(keycode: Int): Boolean {
-            if (!settings.isDeveloperMode) return false
-
             // helper functionality that overrides all sub-screens.
             // all other keys are reserved
             when (keycode) {
                 Input.Keys.F1 -> {
-                    openDataScene()
+                    if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT)) {
+                        sceneManager.pushScene("engine.pebbles.about")
+                    }
                 }
 
                 Input.Keys.F2 -> {
                     // push demo UI
+                    if (!settings.isDeveloperMode) return false
+
                     repeat(sceneManager.stackSize - 1) { sceneManager.exitScene() }
                     sceneManager.swapScene("demo-meta-menu")
                 }
