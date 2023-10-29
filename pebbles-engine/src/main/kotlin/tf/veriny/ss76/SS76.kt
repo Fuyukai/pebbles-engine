@@ -15,6 +15,8 @@ import tf.veriny.ss76.engine.PreferencesManager
 import tf.veriny.ss76.engine.screen.ErrorScreen
 import tf.veriny.ss76.engine.util.EktFiles
 import tf.veriny.ss76.engine.util.EktLogger
+import java.util.*
+import kotlin.collections.HashMap
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
@@ -61,6 +63,17 @@ public class SS76(
 
             val engine = SS76(settings)
             Lwjgl3Application(engine, config)
+        }
+
+        public val GIT_PROPERTIES: Map<String, String> = Properties().let {
+            val stream = SS76::class.java.getResourceAsStream("/git.properties")
+            if (stream == null) {
+                println("uh oh!")
+                emptyMap()
+            } else {
+                stream.reader(Charsets.UTF_8).let { s -> it.load(s) }
+                it.toMap() as Map<String, String>
+            }
         }
     }
 

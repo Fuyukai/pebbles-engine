@@ -18,8 +18,8 @@ import tf.veriny.ss76.use
  * Smoothly fades between two different screens.
  */
 public class FadeInScreen(
-    private val previousScreen: Screen,
-    private val newScreen: Screen,
+    internal val previousScreen: Screen,
+    internal val newScreen: Screen,
     private val state: EngineState,
     private val callback: (EngineState) -> Unit,
 ) : Screen {

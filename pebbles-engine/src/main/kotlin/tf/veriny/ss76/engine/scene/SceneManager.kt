@@ -30,7 +30,7 @@ public class SceneManager(internal val state: EngineState) : Saveable {
     private val sceneMapping = mutableMapOf<String, UnbakedScene>()
 
     /** The stack of scenes currently running. */
-    private val sceneStack = ArrayDeque<SceneState>()
+    internal val sceneStack = ArrayDeque<SceneState>()
 
     /** The set of scenes that have already been viewed. */
     private val seenScenes = mutableSetOf<String>()
