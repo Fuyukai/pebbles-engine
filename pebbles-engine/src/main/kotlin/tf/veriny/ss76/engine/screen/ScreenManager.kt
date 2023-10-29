@@ -4,17 +4,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package tf.veriny.ss76.engine
+package tf.veriny.ss76.engine.screen
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.graphics.Cursor
 import ktx.assets.dispose
 import tf.veriny.ss76.EngineState
-import tf.veriny.ss76.engine.screen.DummyScreen
-import tf.veriny.ss76.engine.screen.ErrorScreen
-import tf.veriny.ss76.engine.screen.FadeInScreen
-import tf.veriny.ss76.engine.screen.Screen
 
 /**
  * Handles switching out SS76 screens.
@@ -70,6 +66,23 @@ public class ScreenManager(internal val state: EngineState) {
         currentScreen = screen
         cachedInputProcessors = screen.getInputProcessors()
         for (it in cachedInputProcessors) { state.input.addProcessor(it) }
+    }
+
+    /**
+     * Changes the current screen to the provided screen, returning a shim screen that can be used
+     * to swap back.
+     */
+    public fun changeScreenWithShim(screen: Screen): ShimScreen {
+        val next = ShimScreen(currentScreen, screen)
+        changeScreen(next, dispose = false)
+        return next
+    }
+
+    /**
+     * Exits the current screen and returns to the one provided by the shim.
+     */
+    public fun exitScreenWithShim(shim: ShimScreen) {
+        changeScreen(shim.previousScreen)
     }
 }
 
