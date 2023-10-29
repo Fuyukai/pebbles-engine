@@ -505,7 +505,11 @@ public class NVLRendererV3(
             }
 
             // Don't draw words if we're currently fading in.
-            if (state.engineState.screenManager.fadeInState != FadeInScreen.FadeInState.FADING_IN) {
+            val currentScreen = state.engineState.screenManager.currentScreen
+            if (
+                currentScreen !is FadeInScreen ||
+                currentScreen.fadeInState != FadeInScreen.FadeInState.FADING_IN
+            ) {
                 drawWords()
             }
 

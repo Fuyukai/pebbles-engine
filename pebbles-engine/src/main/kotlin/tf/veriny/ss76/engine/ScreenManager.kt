@@ -7,6 +7,7 @@
 package tf.veriny.ss76.engine
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.graphics.Cursor
 import ktx.assets.dispose
 import tf.veriny.ss76.EngineState
@@ -23,11 +24,12 @@ public class ScreenManager(internal val state: EngineState) {
         public val SKIP_FADE_INS: Boolean = System.getProperty("ss76.skip-fadein", "false").toBooleanStrict()
     }
 
+    // The number of input processors to remove from the input multiplexer
+    private var cachedInputProcessors: Collection<InputProcessor> = listOf()
+
     /** The current screen being rendered. */
     public var currentScreen: Screen = DummyScreen
-
-    /** The fade-in state, set by the fade-in screen. */
-    public var fadeInState: FadeInScreen.FadeInState = FadeInScreen.FadeInState.STILL
+        private set
 
     /** Changes to the error screen. */
     public fun error(e: Throwable) {
@@ -39,6 +41,9 @@ public class ScreenManager(internal val state: EngineState) {
         currentScreen = ErrorScreen(state, e)
     }
 
+    /**
+     * Fades in a new screen automatically using [FadeInScreen].
+     */
     public fun fadeIn(newScreen: Screen) {
         if (SKIP_FADE_INS) {
             changeScreen(newScreen, dispose = true)
@@ -54,7 +59,7 @@ public class ScreenManager(internal val state: EngineState) {
      */
     public fun changeScreen(screen: Screen, dispose: Boolean = true) {
         val oldScreen = this.currentScreen
-        state.input.removeProcessor(oldScreen)
+        for (it in cachedInputProcessors) { state.input.removeProcessor(it) }
 
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow)
 
@@ -63,7 +68,8 @@ public class ScreenManager(internal val state: EngineState) {
         }
 
         currentScreen = screen
-        state.input.addProcessor(currentScreen)
+        cachedInputProcessors = screen.getInputProcessors()
+        for (it in cachedInputProcessors) { state.input.addProcessor(it) }
     }
 }
 

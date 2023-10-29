@@ -37,6 +37,8 @@ public class FadeInScreen(
     private var timer = 0f
     private val shape = ShapeRenderer()
 
+    public var fadeInState: FadeInState = FadeInState.FADING_IN
+
     override fun dispose() {
         shape.dispose()
     }
@@ -51,7 +53,7 @@ public class FadeInScreen(
             // finished rendering, swap to new screen
             state.screenManager.changeScreen(newScreen, dispose = false)
             dispose()
-            state.screenManager.fadeInState = FadeInState.STILL
+            fadeInState = FadeInState.STILL
             return callback(state)
         } else if (timer > 90f) {
             // white fade in
@@ -62,10 +64,10 @@ public class FadeInScreen(
 
             colour.a = alpha
             newScreen.render(delta)
-            state.screenManager.fadeInState = FadeInState.FADING_IN
+            fadeInState = FadeInState.FADING_IN
         } else if (timer > 30f) {
             // stay white
-            state.screenManager.fadeInState = FadeInState.STILL
+            fadeInState = FadeInState.STILL
         } else {
             // white fade-out
             var alpha = timer / 30f
@@ -75,7 +77,7 @@ public class FadeInScreen(
 
             colour.a = alpha
             previousScreen.render(delta)
-            state.screenManager.fadeInState = FadeInState.FADING_OUT
+            fadeInState = FadeInState.FADING_OUT
         }
 
         timer++

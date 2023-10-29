@@ -44,8 +44,11 @@ private class OpenBrowserButton(override val name: String, private val link: Str
  */
 internal fun SceneManager.registerAboutScene() {
     register("engine.pebbles.about") {
+        modifiers = modifiers.copy(alwaysAllowTextSkip = true)
+
         addButton(OpenBrowserButton("libgdx", "https://libgdx.com/"))
         addButton(OpenBrowserButton("lwjgl3", "https://www.lwjgl.org/"))
+        addButton(OpenBrowserButton("fonts", "https://int10h.org/oldschool-pc-fonts/"))
 
         rawPage {
             if (gitProperties.isEmpty) {
@@ -63,6 +66,12 @@ internal fun SceneManager.registerAboutScene() {
             nl(2)
 
             nlline("\$[@=sky,left-margin=26] Baked with PSM 2.0 \$\$")
+            nl(2)
+
+            nlline(
+                "Uses fonts from the $[@=salmon,`=fonts] Oldschool PC Font Pack $$ made " +
+                "by #[@=green, chomp=] VilerR , and licensed under the CC BY-SA 4.0."
+            )
             nl(2)
 
             rline("Powered by #[@=salmon,`=libgdx] LibGDX and #[@=salmon,`=lwjgl3] LWJGL3")

@@ -99,17 +99,22 @@ public class UnbakedScene(
             val buttonId = node.buttonId!!
             if (buttonId in buttonMap) continue
 
+            var matched = false
+
             for ((regexp, fn) in buttonProviders) {
                 val match = regexp.matchEntire(buttonId)
                 if (match != null) {
                     val value = match.groupValues[1]
                     val button = fn(buttonId, value)
                     buttonMap[buttonId] = button
+                    matched = true
                     break
                 }
             }
 
-            throw IllegalArgumentException("No such button: ${node.buttonId}")
+            if (!matched) {
+                throw IllegalArgumentException("No such button: ${node.buttonId}")
+            }
         }
 
         val scene = SceneDefinition(

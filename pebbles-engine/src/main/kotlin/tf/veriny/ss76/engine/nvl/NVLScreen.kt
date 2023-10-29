@@ -10,6 +10,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.utils.viewport.StretchViewport
+import ktx.app.KtxInputAdapter
 import tf.veriny.ss76.EngineState
 import tf.veriny.ss76.engine.ChangeSceneButton
 import tf.veriny.ss76.engine.VnButtonManager
@@ -22,7 +23,7 @@ import tf.veriny.ss76.engine.screen.Screen
 public class NVLScreen(
     private val state: EngineState,
     private val scene: SceneState,
-) : Screen {
+) : Screen, KtxInputAdapter {
 
 
     private val camera = OrthographicCamera()
