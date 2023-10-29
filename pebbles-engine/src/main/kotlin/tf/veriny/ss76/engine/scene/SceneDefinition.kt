@@ -40,8 +40,8 @@ public class SceneDefinition(
         public val GLOBAL_BUTTONS: Map<String, Button> = mutableMapOf(
             "page-next" to NextPageButton,
             "page-back" to PrevPageButton,
-            "back-button" to VnButtonManager.CHECKPOINT_BUTTON,
-            "checkpoint" to VnButtonManager.GLOBAL_BACK_BUTTON,
+            "back-button" to VnButtonManager.GLOBAL_BACK_BUTTON,
+            "checkpoint" to VnButtonManager.CHECKPOINT_BUTTON,
         )
     }
 
